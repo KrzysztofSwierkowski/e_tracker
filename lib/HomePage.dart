@@ -20,6 +20,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  void _sendMessage() => setState(() {
+    mqttConnect.publishMessage(
+        pubTopic, "Welcome, that's a test message!");
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +41,10 @@ class _HomePageState extends State<HomePage> {
             Text(
               'Liczba',
               style: Theme.of(context).textTheme.bodyText1,
+            ),
+            ElevatedButton(
+              onPressed: () {_sendMessage();},
+              child: const Text('Send topic'),
             ),
           ],
         ),
