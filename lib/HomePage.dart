@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-    ); // przyjemniejsze.
+    );
   }
 
   Future<void> setupMqttClient() async {
