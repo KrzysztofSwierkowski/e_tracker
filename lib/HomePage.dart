@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   MqttConnect mqttConnect = MqttConnect();
-  final String pubTopic = "test/counter";
+  final String pubTopic = "test";
 
   void initState() {
     setupMqttClient();
