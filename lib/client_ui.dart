@@ -1,80 +1,63 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-
 import 'MqttConnect.dart';
-import 'client_ui.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class ClientUi extends StatefulWidget {
+  const ClientUi({Key? key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _ClientUiState createState() => _ClientUiState();
 }
 
 final Completer<GoogleMapController> _controller = Completer();
-const LatLng sourceLocation = LatLng(50.92218882128666, 15.758256941801612);
-const LatLng destination = LatLng(50.90360846121795, 15.720444222654319);
+
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 
-class _HomePageState extends State<HomePage> {
+class _ClientUiState extends State<ClientUi> {
   MqttConnect mqttConnect = MqttConnect();
   final String pubTopic = "test";
   String _getMessange = '';
+  double a = 0.0;
+  double b = 0.0;
 
   @override
   void initState() {
-    getPolyPoints();
+
     getCurrentLocation();
     setupMqttClient();
     setupUpdatesListener();
     _getNewMessange();
     super.initState();
+
   }
 
   List<LatLng> polylineCoordinates = [];
 
-  void getPolyPoints() async {
-    PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      google_api_key, // Your Google Map Key
-      PointLatLng(sourceLocation.latitude, sourceLocation.longitude),
-      PointLatLng(destination.latitude, destination.longitude),
-    );
-    if (result.points.isNotEmpty) {
-      result.points.forEach(
-        (PointLatLng point) => polylineCoordinates.add(
-          LatLng(point.latitude, point.longitude),
-        ),
-      );
-      setState(() {});
-    }
-  }
+
 
   LocationData? currentLocation;
 
   void getCurrentLocation() async {
     Location location = Location();
     location.getLocation().then(
-      (location) {
+          (location) {
         currentLocation = location;
       },
     );
     GoogleMapController googleMapController = await _controller.future;
     location.onLocationChanged.listen(
-      (newLoc) {
+          (newLoc) {
         currentLocation = newLoc;
         googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
-              zoom: 16 ,
+              zoom: 17,
               target: LatLng(
-                newLoc.latitude!,
-                newLoc.longitude!,
+                a = newLoc.latitude!,
+                b = newLoc.longitude!,
               ),
             ),
           ),
@@ -84,19 +67,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  static final LatLng _kMapCenter =
-      LatLng(50.90360846121795, 15.720444222654319);
 
-  // static final CameraPosition _kInitialPosition =
-  //     CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   void _sendMessage() => setState(() {
-        mqttConnect.publishMessage(pubTopic, "Welcome, that's a test message!");
-      });
+    mqttConnect.publishMessage(pubTopic, "att: $a latt: $b");
+  });
 
   void _subscribeMessange() => setState(() {
-        mqttConnect.subscribe(pubTopic);
-      });
+    mqttConnect.subscribe(pubTopic);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -120,40 +99,33 @@ class _HomePageState extends State<HomePage> {
                           currentLocation == null
                               ? const Center(child: Text("Loading"))
                               : GoogleMap(
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(currentLocation!.latitude!,
-                                        currentLocation!.longitude!),
-                                    zoom: 16,
-                                  ),
-                                  markers: {
-                                    Marker(
-                                      markerId:
-                                          const MarkerId("currentLocation"),
-                                      position: LatLng(
-                                          currentLocation!.latitude!,
-                                          currentLocation!.longitude!),
-                                    ),
-                                    const Marker(
-                                      markerId: MarkerId("source"),
-                                      position: sourceLocation,
-                                    ),
-                                    const Marker(
-                                      markerId: MarkerId("destination"),
-                                      position: destination,
-                                    ),
-                                  },
-                                  onMapCreated: (mapController) {
-                                    _controller.complete(mapController);
-                                  },
-                                  polylines: {
-                                    Polyline(
-                                      polylineId: const PolylineId("route"),
-                                      points: polylineCoordinates,
-                                      color: const Color(0xFF7B61FF),
-                                      width: 6,
-                                    ),
-                                  },
-                                ),
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(currentLocation!.latitude!,
+                                  currentLocation!.longitude!),
+                            //  zoom: 20,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId:
+                                const MarkerId("currentLocation"),
+                                position: LatLng(
+                                    currentLocation!.latitude!,
+                                    currentLocation!.longitude!),
+                              ),
+
+                            },
+                            onMapCreated: (mapController) {
+                              _controller.complete(mapController);
+                            },
+                            polylines: {
+                              Polyline(
+                                polylineId: const PolylineId("route"),
+                                points: polylineCoordinates,
+                                color: const Color(0xFF7B61FF),
+                                width: 6,
+                              ),
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -182,15 +154,7 @@ class _HomePageState extends State<HomePage> {
                       },
                       child: const Text('Get stream'),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ClientUi()),
-                        );
-                      },
-                      child: const Text('provider'),
-                    ),
+
                   ],
                 ),
               ),
@@ -212,7 +176,7 @@ class _HomePageState extends State<HomePage> {
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       late final pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
         _getMessange =
@@ -227,7 +191,7 @@ class _HomePageState extends State<HomePage> {
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       final pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
     });
   }
