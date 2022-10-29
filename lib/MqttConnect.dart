@@ -13,6 +13,7 @@ class MqttConnect {
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
     client.onSubscribed = onSubscribed;
+
     client.pongCallback = pong;
 
     final connMessage =
