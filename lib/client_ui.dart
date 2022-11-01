@@ -34,10 +34,6 @@ class _ClientUiState extends State<ClientUi> {
 
   }
 
-  List<LatLng> polylineCoordinates = [];
-
-
-
   LocationData? currentLocation;
 
   void getCurrentLocation() async {
@@ -93,37 +89,25 @@ class _ClientUiState extends State<ClientUi> {
                   children: <Widget>[
                     Container(
                       height: MediaQuery.of(context).size.height * 0.8,
-                      width: MediaQuery.of(context).size.width * 0.7,
+                      width: MediaQuery.of(context).size.width,
                       child: Stack(
                         children: [
-                          currentLocation == null
-                              ? const Center(child: Text("Loading"))
-                              : GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: LatLng(currentLocation!.latitude!,
-                                  currentLocation!.longitude!),
-                            //  zoom: 20,
+                          GoogleMap(
+                            initialCameraPosition: const CameraPosition(
+                              target: LatLng(50.9036471521864, 15.720458902487849),
+                              zoom: 16,
                             ),
-                            markers: {
+                            markers: currentLocation == null ? Set() : [
                               Marker(
                                 markerId:
                                 const MarkerId("currentLocation"),
                                 position: LatLng(
                                     currentLocation!.latitude!,
                                     currentLocation!.longitude!),
-                              ),
+                              )].toSet(),
 
-                            },
                             onMapCreated: (mapController) {
                               _controller.complete(mapController);
-                            },
-                            polylines: {
-                              Polyline(
-                                polylineId: const PolylineId("route"),
-                                points: polylineCoordinates,
-                                color: const Color(0xFF7B61FF),
-                                width: 6,
-                              ),
                             },
                           ),
                         ],

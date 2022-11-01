@@ -5,6 +5,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:phone_mqtt/provider_ui.dart';
 
 import 'MqttConnect.dart';
 import 'client_ui.dart';
@@ -20,16 +21,20 @@ final Completer<GoogleMapController> _controller = Completer();
 const LatLng sourceLocation = LatLng(50.92218882128666, 15.758256941801612);
 const LatLng destination = LatLng(50.90360846121795, 15.720444222654319);
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
+bool provider = false;
 
 class _HomePageState extends State<HomePage> {
   MqttConnect mqttConnect = MqttConnect();
   final String pubTopic = "test";
   String _getMessange = '';
+  ProviderUI providerUI = ProviderUI();
+  double latitude = 0.0;
+  double longitude = 0.0;
 
   @override
   void initState() {
-    getPolyPoints();
     getCurrentLocation();
+    getPolyPoints();
     setupMqttClient();
     setupUpdatesListener();
     _getNewMessange();
@@ -71,10 +76,10 @@ class _HomePageState extends State<HomePage> {
         googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
-              zoom: 16 ,
+              zoom: 16,
               target: LatLng(
-                newLoc.latitude!,
-                newLoc.longitude!,
+                latitude = newLoc.latitude!,
+                longitude = newLoc.longitude!,
               ),
             ),
           ),
@@ -85,13 +90,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   static final LatLng _kMapCenter =
+
       LatLng(50.90360846121795, 15.720444222654319);
 
   // static final CameraPosition _kInitialPosition =
   //     CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   void _sendMessage() => setState(() {
-        mqttConnect.publishMessage(pubTopic, "Welcome, that's a test message!");
+    getCurrentLocation();
+        mqttConnect.publishMessage(pubTopic,'$latitude,$longitude' );
       });
 
   void _subscribeMessange() => setState(() {
@@ -112,84 +119,36 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      child: Stack(
-                        children: [
-                          currentLocation == null
-                              ? const Center(child: Text("Loading"))
-                              : GoogleMap(
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(currentLocation!.latitude!,
-                                        currentLocation!.longitude!),
-                                    zoom: 16,
-                                  ),
-                                  markers: {
-                                    Marker(
-                                      markerId:
-                                          const MarkerId("currentLocation"),
-                                      position: LatLng(
-                                          currentLocation!.latitude!,
-                                          currentLocation!.longitude!),
-                                    ),
-                                    const Marker(
-                                      markerId: MarkerId("source"),
-                                      position: sourceLocation,
-                                    ),
-                                    const Marker(
-                                      markerId: MarkerId("destination"),
-                                      position: destination,
-                                    ),
-                                  },
-                                  onMapCreated: (mapController) {
-                                    _controller.complete(mapController);
-                                  },
-                                  polylines: {
-                                    Polyline(
-                                      polylineId: const PolylineId("route"),
-                                      points: polylineCoordinates,
-                                      color: const Color(0xFF7B61FF),
-                                      width: 6,
-                                    ),
-                                  },
-                                ),
-                        ],
+                    Row(children: <Widget>[
+                      Checkbox(
+                        checkColor: Colors.redAccent,
+                        value: provider,
+                        onChanged: (bool? value) {
+                          for (int i = 0; i < 50; i++) {
+print('test $i');
+
+                          }
+
+                          _sendMessage();
+                          setState(() {
+                            provider = value!;
+                          });
+                        },
                       ),
-                    ),
-                    const Text(
-                      'Below are the test buttons for the Mqtt',
-                    ),
-                    Text(
-                      _getMessange,
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
+                      SelectionContainer.disabled(
+                          child: Text('GPS provider $_getMessange')),
+                    ]),
+                    Text(providerUI.getMessange),
                     ElevatedButton(
                       onPressed: () {
-                        _sendMessage();
-                      },
-                      child: const Text('Send topic'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _subscribeMessange();
-                      },
-                      child: const Text('Subscribe topic'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _getNewMessange();
-                      },
-                      child: const Text('Get stream'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
+                        getCurrentLocation();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ClientUi()),
+                          MaterialPageRoute(
+                              builder: (context) => const ClientUi()),
                         );
                       },
-                      child: const Text('provider'),
+                      child: const Text('ClientApp'),
                     ),
                   ],
                 ),
@@ -231,6 +190,9 @@ class _HomePageState extends State<HomePage> {
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
     });
   }
+
+
+
 
   @override
   void dispose() {
