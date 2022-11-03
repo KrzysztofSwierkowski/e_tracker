@@ -18,8 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 final Completer<GoogleMapController> _controller = Completer();
-const LatLng sourceLocation = LatLng(50.92218882128666, 15.758256941801612);
-const LatLng destination = LatLng(50.90360846121795, 15.720444222654319);
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 bool provider = false;
 
@@ -34,7 +32,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     getCurrentLocation();
-    getPolyPoints();
     setupMqttClient();
     setupUpdatesListener();
     _getNewMessange();
@@ -42,23 +39,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<LatLng> polylineCoordinates = [];
-
-  void getPolyPoints() async {
-    PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      google_api_key, // Your Google Map Key
-      PointLatLng(sourceLocation.latitude, sourceLocation.longitude),
-      PointLatLng(destination.latitude, destination.longitude),
-    );
-    if (result.points.isNotEmpty) {
-      result.points.forEach(
-        (PointLatLng point) => polylineCoordinates.add(
-          LatLng(point.latitude, point.longitude),
-        ),
-      );
-      setState(() {});
-    }
-  }
 
   LocationData? currentLocation;
 
@@ -69,36 +49,38 @@ class _HomePageState extends State<HomePage> {
         currentLocation = location;
       },
     );
-    GoogleMapController googleMapController = await _controller.future;
+    location.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 10000, distanceFilter: 5);
     location.onLocationChanged.listen(
       (newLoc) {
         currentLocation = newLoc;
-        googleMapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              zoom: 16,
-              target: LatLng(
-                latitude = newLoc.latitude!,
-                longitude = newLoc.longitude!,
-              ),
-            ),
-          ),
-        );
-        setState(() {});
+
+        latitude = newLoc.latitude!;
+        longitude = newLoc.longitude!;
+
+        onChanged: (currentLocation) {
+          setState(() {
+            _sendMessage();
+          });
+
+        };
+
+        setState(() {
+          // _sendMessage();
+        });
       },
     );
   }
 
   static final LatLng _kMapCenter =
-
       LatLng(50.90360846121795, 15.720444222654319);
 
   // static final CameraPosition _kInitialPosition =
   //     CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   void _sendMessage() => setState(() {
-    getCurrentLocation();
-        mqttConnect.publishMessage(pubTopic,'$latitude,$longitude' );
+        getCurrentLocation();
+        mqttConnect.publishMessage(pubTopic, '$latitude,$longitude');
       });
 
   void _subscribeMessange() => setState(() {
@@ -125,12 +107,12 @@ class _HomePageState extends State<HomePage> {
                         value: provider,
                         onChanged: (bool? value) {
                           for (int i = 0; i < 50; i++) {
-print('test $i');
-
+                            print('test $i');
                           }
 
-                          _sendMessage();
+                          //_sendMessage();
                           setState(() {
+                            _sendMessage();
                             provider = value!;
                           });
                         },
@@ -190,9 +172,6 @@ print('test $i');
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
     });
   }
-
-
-
 
   @override
   void dispose() {
