@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'MqttConnect.dart';
 
+
 class ClientUi extends StatefulWidget {
   const ClientUi({Key? key}) : super(key: key);
 
@@ -16,7 +17,9 @@ final Completer<GoogleMapController> _controller = Completer();
 
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 
-class _ClientUiState extends State<ClientUi> {
+class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
+
+
   MqttConnect mqttConnect = MqttConnect();
   final String pubTopic = "test";
   String _getMessange = '';
@@ -25,36 +28,42 @@ class _ClientUiState extends State<ClientUi> {
 
   @override
   void initState() {
-
     getCurrentLocation();
     setupMqttClient();
     setupUpdatesListener();
     _getNewMessange();
+
     super.initState();
 
   }
 
+  List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
 
   void getCurrentLocation() async {
     Location location = Location();
+    location.enableBackgroundMode(enable: true);
+    location.changeSettings(accuracy: LocationAccuracy.high, interval: 5000,distanceFilter: 5);
     location.getLocation().then(
-          (location) {
+      (location) {
         currentLocation = location;
       },
     );
     GoogleMapController googleMapController = await _controller.future;
+    Completer<GoogleMapController> _controllerMap = Completer();
+
     location.onLocationChanged.listen(
-          (newLoc) {
+      (newLoc) {
         currentLocation = newLoc;
         googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
-              zoom: 17,
+              bearing: 0,
               target: LatLng(
                 a = newLoc.latitude!,
                 b = newLoc.longitude!,
               ),
+              zoom: 17,
             ),
           ),
         );
@@ -63,18 +72,18 @@ class _ClientUiState extends State<ClientUi> {
     );
   }
 
-
-
   void _sendMessage() => setState(() {
-    mqttConnect.publishMessage(pubTopic, "att: $a latt: $b");
-  });
+        mqttConnect.publishMessage(pubTopic, "att: $a latt: $b");
+      });
 
   void _subscribeMessange() => setState(() {
-    mqttConnect.subscribe(pubTopic);
-  });
+        mqttConnect.subscribe(pubTopic);
+      });
+
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Mqtt Home'),
@@ -93,21 +102,16 @@ class _ClientUiState extends State<ClientUi> {
                       child: Stack(
                         children: [
                           GoogleMap(
-                            initialCameraPosition: const CameraPosition(
-                              target: LatLng(50.9036471521864, 15.720458902487849),
+                            mapType: MapType.hybrid,
+                            initialCameraPosition: CameraPosition(
+                              target:
+                                  LatLng(50.9036471521864, 15.720458902487849),
                               zoom: 16,
                             ),
-                            markers: currentLocation == null ? Set() : [
-                              Marker(
-                                markerId:
-                                const MarkerId("currentLocation"),
-                                position: LatLng(
-                                    currentLocation!.latitude!,
-                                    currentLocation!.longitude!),
-                              )].toSet(),
-
-                            onMapCreated: (mapController) {
-                              _controller.complete(mapController);
+                            myLocationEnabled: true,
+                            trafficEnabled: true,
+                            onMapCreated: (GoogleMapController controller) {
+                              _controller.complete(controller);
                             },
                           ),
                         ],
@@ -134,11 +138,10 @@ class _ClientUiState extends State<ClientUi> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _getNewMessange();
+                        getCurrentLocation();
                       },
-                      child: const Text('Get stream'),
+                      child: const Text('get location'),
                     ),
-
                   ],
                 ),
               ),
@@ -160,7 +163,7 @@ class _ClientUiState extends State<ClientUi> {
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       late final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
         _getMessange =
@@ -175,14 +178,20 @@ class _ClientUiState extends State<ClientUi> {
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
     });
   }
 
   @override
   void dispose() {
-    mqttConnect.disconnect();
+   // mqttConnect.disconnect();
     super.dispose();
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
+
+

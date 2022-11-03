@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   ProviderUI providerUI = ProviderUI();
   double latitude = 0.0;
   double longitude = 0.0;
+  int currentPageIndex = 0;
 
   @override
   void initState() {
@@ -49,8 +50,7 @@ class _HomePageState extends State<HomePage> {
         currentLocation = location;
       },
     );
-    location.changeSettings(
-        accuracy: LocationAccuracy.high, interval: 10000, distanceFilter: 5);
+    location.changeSettings(accuracy: LocationAccuracy.high, interval: 5000);
     location.onLocationChanged.listen(
       (newLoc) {
         currentLocation = newLoc;
@@ -58,25 +58,12 @@ class _HomePageState extends State<HomePage> {
         latitude = newLoc.latitude!;
         longitude = newLoc.longitude!;
 
-        onChanged: (currentLocation) {
-          setState(() {
-            _sendMessage();
-          });
-
-        };
-
         setState(() {
           // _sendMessage();
         });
       },
     );
   }
-
-  static final LatLng _kMapCenter =
-      LatLng(50.90360846121795, 15.720444222654319);
-
-  // static final CameraPosition _kInitialPosition =
-  //     CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   void _sendMessage() => setState(() {
         getCurrentLocation();
@@ -87,11 +74,35 @@ class _HomePageState extends State<HomePage> {
         mqttConnect.subscribe(pubTopic);
       });
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mqtt Home'),
+        title: const Text('BottomNavigationBar Sample'),
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.explore),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.commute),
+            label: 'Client',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.bookmark),
+            icon: Icon(Icons.bookmark_border),
+            label: 'Provider',
+          ),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -112,7 +123,7 @@ class _HomePageState extends State<HomePage> {
 
                           //_sendMessage();
                           setState(() {
-                            _sendMessage();
+                            //_sendMessage();
                             provider = value!;
                           });
                         },
@@ -173,9 +184,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  @override
-  void dispose() {
-    mqttConnect.disconnect();
-    super.dispose();
-  }
+// @override
+// void dispose() {
+//   mqttConnect.disconnect();
+//   super.dispose();
+// }
 }
