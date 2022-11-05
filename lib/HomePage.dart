@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BottomNavigationBar Sample'),
+        title: const Text('Udostępnianie lokalizacji'),
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -90,16 +90,16 @@ class _HomePageState extends State<HomePage> {
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
-            icon: Icon(Icons.explore),
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.commute),
+            icon: Icon(Icons.near_me),
             label: 'Client',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.bookmark),
-            icon: Icon(Icons.bookmark_border),
+            icon: Icon(Icons.share_location),
             label: 'Provider',
           ),
         ],
