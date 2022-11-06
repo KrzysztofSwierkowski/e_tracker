@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phone_mqtt/HomePage.dart';
+import 'package:phone_mqtt/menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
 
       theme: ThemeData(
       ),
-      home: const HomePage(),
+      home: const Menu(),
 
     );
   }

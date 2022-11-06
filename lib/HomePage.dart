@@ -1,12 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/provider_ui.dart';
-
 import 'MqttConnect.dart';
 import 'client_ui.dart';
 
@@ -75,79 +72,20 @@ class _HomePageState extends State<HomePage> {
       });
 
 
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Udostępnianie lokalizacji'),
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.near_me),
-            label: 'Client',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.bookmark),
-            icon: Icon(Icons.share_location),
-            label: 'Provider',
-          ),
-        ],
-      ),
       body: Column(
         children: <Widget>[
-          Expanded(
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(children: <Widget>[
-                      Checkbox(
-                        checkColor: Colors.redAccent,
-                        value: provider,
-                        onChanged: (bool? value) {
-                          for (int i = 0; i < 50; i++) {
-                            print('test $i');
-                          }
 
-                          //_sendMessage();
-                          setState(() {
-                            //_sendMessage();
-                            provider = value!;
-                          });
-                        },
-                      ),
-                      SelectionContainer.disabled(
-                          child: Text('GPS provider $_getMessange')),
-                    ]),
-                    Text(providerUI.getMessange),
-                    ElevatedButton(
-                      onPressed: () {
-                        getCurrentLocation();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ClientUi()),
-                        );
-                      },
-                      child: const Text('ClientApp'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+
         ],
       ),
     );

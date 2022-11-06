@@ -5,7 +5,6 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'MqttConnect.dart';
 
-
 class ClientUi extends StatefulWidget {
   const ClientUi({Key? key}) : super(key: key);
 
@@ -17,14 +16,17 @@ final Completer<GoogleMapController> _controller = Completer();
 
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 
-class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
-
-
+class _ClientUiState extends State<ClientUi>
+    with AutomaticKeepAliveClientMixin {
   MqttConnect mqttConnect = MqttConnect();
+
+
   final String pubTopic = "test";
   String _getMessange = '';
   double a = 0.0;
   double b = 0.0;
+
+  // 15.720458902487849
 
   @override
   void initState() {
@@ -34,7 +36,6 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
     _getNewMessange();
 
     super.initState();
-
   }
 
   List<LatLng> polylineCoordinates = [];
@@ -43,7 +44,8 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
   void getCurrentLocation() async {
     Location location = Location();
     location.enableBackgroundMode(enable: true);
-    location.changeSettings(accuracy: LocationAccuracy.high, interval: 5000,distanceFilter: 5);
+    location.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 5000, distanceFilter: 5);
     location.getLocation().then(
       (location) {
         currentLocation = location;
@@ -63,12 +65,14 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
                 a = newLoc.latitude!,
                 b = newLoc.longitude!,
               ),
-              zoom: 17,
+              zoom: 18,
             ),
           ),
         );
-        setState(() {});
+        setState(() {
+        });
       },
+
     );
   }
 
@@ -81,74 +85,26 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
       });
 
 
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mqtt Home'),
+    body:
+
+    GoogleMap(
+        mapType: MapType.hybrid,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(50.9227, 15.7674),
+          zoom: 18,
+        ),
+        myLocationEnabled: true,
+        trafficEnabled: true,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      width: MediaQuery.of(context).size.width,
-                      child: Stack(
-                        children: [
-                          GoogleMap(
-                            mapType: MapType.hybrid,
-                            initialCameraPosition: CameraPosition(
-                              target:
-                                  LatLng(50.9036471521864, 15.720458902487849),
-                              zoom: 16,
-                            ),
-                            myLocationEnabled: true,
-                            trafficEnabled: true,
-                            onMapCreated: (GoogleMapController controller) {
-                              _controller.complete(controller);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Text(
-                      'Below are the test buttons for the Mqtt',
-                    ),
-                    Text(
-                      _getMessange,
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _sendMessage();
-                      },
-                      child: const Text('Send topic'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _subscribeMessange();
-                      },
-                      child: const Text('Subscribe topic'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        getCurrentLocation();
-                      },
-                      child: const Text('get location'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+
     );
   }
 
@@ -185,7 +141,7 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
-   // mqttConnect.disconnect();
+    // mqttConnect.disconnect();
     super.dispose();
   }
 
@@ -193,5 +149,3 @@ class _ClientUiState extends State<ClientUi>with AutomaticKeepAliveClientMixin {
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
-
-
