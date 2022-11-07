@@ -20,29 +20,39 @@ class ProviderUI{
 
   void getCurrentLocation() async {
     Location location = Location();
+    location.enableBackgroundMode(enable: true);
+    location.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 5000, distanceFilter: 5);
     location.getLocation().then(
           (location) {
         currentLocation = location;
       },
     );
     GoogleMapController googleMapController = await _controller.future;
+    Completer<GoogleMapController> _controllerMap = Completer();
+
     location.onLocationChanged.listen(
           (newLoc) {
         currentLocation = newLoc;
         googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
-              zoom: 17,
+              bearing: 0,
               target: LatLng(
                 a = newLoc.latitude!,
                 b = newLoc.longitude!,
               ),
+              zoom: 18,
             ),
           ),
         );
+sendMessage();
       },
+
     );
   }
+
+
 
 
 

@@ -5,7 +5,6 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/provider_ui.dart';
 import 'MqttConnect.dart';
-import 'client_ui.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -56,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         longitude = newLoc.longitude!;
 
         setState(() {
-          // _sendMessage();
+           _sendMessage();
         });
       },
     );
@@ -122,9 +121,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-// @override
-// void dispose() {
-//   mqttConnect.disconnect();
-//   super.dispose();
-// }
+@override
+void dispose() {
+  mqttConnect.disconnect();
+  super.dispose();
+}
 }

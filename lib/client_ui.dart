@@ -100,6 +100,12 @@ class _ClientUiState extends State<ClientUi>
         ),
         myLocationEnabled: true,
         trafficEnabled: true,
+      markers: currentLocation == null ? Set() : [
+        Marker(
+            markerId: MarkerId("1"),
+            position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!)
+        )
+      ].toSet(),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
