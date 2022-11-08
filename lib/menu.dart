@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phone_mqtt/HomePage.dart';
+import 'package:phone_mqtt/home_page.dart';
 import 'package:phone_mqtt/client_ui.dart';
 import 'package:phone_mqtt/provider_ui.dart';
 import 'package:phone_mqtt/settings.dart';
@@ -18,6 +18,7 @@ class _MenuState extends State<Menu> {
   static const TextStyle optionStyle =
   TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
+
     HomePage(),
     ClientUi(),
     Text(

@@ -3,7 +3,7 @@ class Assets {
   Assets._();
 
   static const String generatedAssets = 'lib/generated/assets.dart';
-  static const String libHome = 'lib/HomePage.dart';
+  static const String libHome = 'lib/home_page.dart';
   static const String libMain = 'lib/main.dart';
 
 }

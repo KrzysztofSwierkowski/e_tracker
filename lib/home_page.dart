@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:phone_mqtt/data_provider.dart';
 import 'package:phone_mqtt/provider_ui.dart';
-import 'MqttConnect.dart';
+import 'mqtt_connect.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,6 +20,8 @@ bool provider = false;
 
 class _HomePageState extends State<HomePage> {
   MqttConnect mqttConnect = MqttConnect();
+  DataProvider dataProvider = DataProvider();
+
   final String pubTopic = "test";
   String _getMessange = '';
   ProviderUI providerUI = ProviderUI();
@@ -28,43 +31,19 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    getCurrentLocation();
+
     setupMqttClient();
     setupUpdatesListener();
     _getNewMessange();
     super.initState();
   }
 
-  List<LatLng> polylineCoordinates = [];
-
-  LocationData? currentLocation;
-
-  void getCurrentLocation() async {
-    Location location = Location();
-    location.getLocation().then(
-      (location) {
-        currentLocation = location;
-      },
-    );
-    location.changeSettings(accuracy: LocationAccuracy.high, interval: 5000);
-    location.onLocationChanged.listen(
-      (newLoc) {
-        currentLocation = newLoc;
-
-        latitude = newLoc.latitude!;
-        longitude = newLoc.longitude!;
-
-        setState(() {
-           _sendMessage();
-        });
-      },
-    );
-  }
-
   void _sendMessage() => setState(() {
-        getCurrentLocation();
-        mqttConnect.publishMessage(pubTopic, '$latitude,$longitude');
-      });
+
+    mqttConnect.publishMessage(pubTopic, '$latitude,$longitude');
+  });
+
+
 
   void _subscribeMessange() => setState(() {
         mqttConnect.subscribe(pubTopic);

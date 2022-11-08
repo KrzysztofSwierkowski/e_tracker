@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttConnect {
   MqttServerClient client =
-  MqttServerClient.withPort('178.43.118.138', 'test', 1883);
+  MqttServerClient.withPort('178.43.119.190', 'test', 1883);
+  String topicTest = 'test';
 
   Future<int> connect() async {
     client.logging(on: true);
@@ -33,6 +35,12 @@ class MqttConnect {
     return 0;
   }
 
+  void sendCoord(LocationData locationData){
+    String coordinatesData = coordinates(locationData);
+    publishMessage(topicTest, coordinatesData);
+
+  }
+
   void disconnect(){
     client.disconnect();
   }
@@ -43,6 +51,7 @@ class MqttConnect {
 
   void onConnected() {
     print('MQTTClient::Connected');
+
   }
 
   void onDisconnected() {
@@ -62,6 +71,11 @@ class MqttConnect {
     builder.addString(message);
     client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
+
+  String coordinates(LocationData location) {
+      return "${location.latitude},${location.longitude}";
+    }
+
 
   Stream<List<MqttReceivedMessage<MqttMessage>>>? getMessagesStream() {
     return client.updates;

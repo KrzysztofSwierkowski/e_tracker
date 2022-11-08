@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'MqttConnect.dart';
+import 'mqtt_connect.dart';
 
 final Completer<GoogleMapController> _controller = Completer();
 
