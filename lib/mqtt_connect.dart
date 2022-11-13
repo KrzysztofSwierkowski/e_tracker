@@ -1,10 +1,19 @@
 import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'dart:math';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttConnect {
-  MqttServerClient client =
-  MqttServerClient.withPort('178.43.119.190', 'abc', 1883);
+
+  String UserID() {
+
+  late String userId = generateRandomString(6);
+  print('MQTTClient:: $userId: ');
+return userId;
+}
+
+  late MqttServerClient client =
+  MqttServerClient.withPort('178.43.119.190', UserID(), 1883);
   String topicTest = 'test';
 
   Future<int> connect() async {
@@ -79,4 +88,15 @@ class MqttConnect {
   Stream<List<MqttReceivedMessage<MqttMessage>>>? getMessagesStream() {
     return client.updates;
   }
+
+
+  static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+
+  String generateRandomString(int len) {
+    var r = Random();
+    const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    return List.generate(len, (index) => chars[r.nextInt(chars.length)]).join();
+  }
+
+
 }
