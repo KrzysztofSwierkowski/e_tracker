@@ -53,6 +53,7 @@ class _ProviderState extends State<Provider> {
         //     ),
         //   ),
         // );
+        currentLocation!.longitude;
         setState(() {
           sendMessage();
         });

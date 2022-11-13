@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:phone_mqtt/data_provider.dart';
-import 'package:phone_mqtt/provider_ui.dart';
+import 'package:phone_mqtt/provider.dart';
 import 'mqtt_connect.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,7 +22,7 @@ class _HomePageState extends State<HomePage> {
 
   final String pubTopic = "test";
   String _getMessange = '';
-  ProviderUI providerUI = ProviderUI();
+  Provider provider = Provider();
   double latitude = 0.0;
   double longitude = 0.0;
   int currentPageIndex = 0;
@@ -61,7 +60,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: <Widget>[
-
+Text("Location data:"),
           Text(_getMessange),
 
         ],

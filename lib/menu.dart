@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:phone_mqtt/home_page.dart';
 import 'package:phone_mqtt/provider.dart';
 
+import 'client_ui.dart';
+
 
 
 class Menu extends StatefulWidget {
@@ -19,8 +21,7 @@ class _MenuState extends State<Menu> {
   static const List<Widget> _widgetOptions = <Widget>[
 
     HomePage(),
-    Text('data'),
-    //ClientUi(),
+    ClientUi(),
     Provider(),
     Text('data'),
     //Settings(),
