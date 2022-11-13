@@ -1,14 +1,20 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'mqtt_connect.dart';
 
-final Completer<GoogleMapController> _controller = Completer();
 
-String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
+class Provider extends StatefulWidget {
+  const Provider({super.key});
 
-class ProviderUI{
+  @override
+  _ProviderState createState() => _ProviderState();
+}
+
+class _ProviderState extends State<Provider> {
 
   MqttConnect mqttConnect = MqttConnect();
   final String pubTopic = "test";
@@ -29,39 +35,60 @@ class ProviderUI{
       },
     );
 
-    GoogleMapController googleMapController = await _controller.future;
+   // GoogleMapController googleMapController = await _controller.future;
     Completer<GoogleMapController> _controllerMap = Completer();
 
     location.onLocationChanged.listen(
           (newLoc) {
         currentLocation = newLoc;
-        googleMapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              bearing: 0,
-              target: LatLng(
-                a = newLoc.latitude!,
-                b = newLoc.longitude!,
-              ),
-              zoom: 18,
-            ),
-          ),
-        );
-sendMessage();
+        // googleMapController.animateCamera(
+        //   CameraUpdate.newCameraPosition(
+        //     CameraPosition(
+        //       bearing: 0,
+        //       target: LatLng(
+        //         a = newLoc.latitude!,
+        //         b = newLoc.longitude!,
+        //       ),
+        //       zoom: 18,
+        //     ),
+        //   ),
+        // );
+        setState(() {
+          sendMessage();
+        });
+
       },
+
 
     );
   }
 
+  @override
+  void initState() {
+    setupMqttClient();
+    setupUpdatesListener();
+    getCurrentLocation();
+    super.initState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
 
 
 
   void sendMessage() {
-    mqttConnect.publishMessage(pubTopic, "att: $a latt: $b");
+    if (mqttConnect.client.connectionStatus!.state == MqttConnectionState.connected) {
+      mqttConnect.publishMessage(pubTopic, "$currentLocation");
+    }else{
+      setupMqttClient();
+    }
+
   }
 
   void subscribeMessange() {
+
     mqttConnect.subscribe(pubTopic);
   }
 
@@ -72,7 +99,7 @@ sendMessage();
     mqttConnect.subscribe(pubTopic);
   }
 
-void getNewMessange() {
+  void getNewMessange() {
     mqttConnect
         .getMessagesStream()!
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
@@ -95,5 +122,12 @@ void getNewMessange() {
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
     });
   }
+
+@override
+void dispose() {
+//  mqttConnect.disconnect();
+  super.dispose();
+}
+
 
 }

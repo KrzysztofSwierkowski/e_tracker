@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/data_provider.dart';
 import 'package:phone_mqtt/provider_ui.dart';
@@ -20,7 +19,7 @@ bool provider = false;
 
 class _HomePageState extends State<HomePage> {
   MqttConnect mqttConnect = MqttConnect();
-  DataProvider dataProvider = DataProvider();
+  //DataProvider dataProvider = DataProvider();
 
   final String pubTopic = "test";
   String _getMessange = '';
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
 
     setupMqttClient();
-    setupUpdatesListener();
+   // setupUpdatesListener();
     _getNewMessange();
     super.initState();
   }
@@ -63,6 +62,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: <Widget>[
 
+          Text(_getMessange),
 
         ],
       ),
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
 
 @override
 void dispose() {
-  mqttConnect.disconnect();
+ // mqttConnect.disconnect();
   super.dispose();
 }
 }

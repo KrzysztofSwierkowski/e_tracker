@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phone_mqtt/home_page.dart';
-import 'package:phone_mqtt/client_ui.dart';
-import 'package:phone_mqtt/provider_ui.dart';
-import 'package:phone_mqtt/settings.dart';
+import 'package:phone_mqtt/provider.dart';
+
 
 
 class Menu extends StatefulWidget {
@@ -20,12 +19,11 @@ class _MenuState extends State<Menu> {
   static const List<Widget> _widgetOptions = <Widget>[
 
     HomePage(),
-    ClientUi(),
-    Text(
-      'Provider',
-      style: optionStyle,
-    ),
-    Settings(),
+    Text('data'),
+    //ClientUi(),
+    Provider(),
+    Text('data'),
+    //Settings(),
   ];
 
   void _onItemTapped(int index) {

@@ -1,12 +1,10 @@
 import 'dart:io';
-
-import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttConnect {
   MqttServerClient client =
-  MqttServerClient.withPort('178.43.119.190', 'test', 1883);
+  MqttServerClient.withPort('178.43.119.190', 'abc', 1883);
   String topicTest = 'test';
 
   Future<int> connect() async {
@@ -15,7 +13,7 @@ class MqttConnect {
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
     client.onSubscribed = onSubscribed;
-
+    client.autoReconnect = true;
     client.pongCallback = pong;
 
     final connMessage =
@@ -35,18 +33,19 @@ class MqttConnect {
     return 0;
   }
 
-  void sendCoord(LocationData locationData){
-    String coordinatesData = coordinates(locationData);
-    publishMessage(topicTest, coordinatesData);
-
-  }
+  // void sendCoord(Position locationData){
+  //   String coordinatesData = coordinates(locationData);
+  //   publishMessage(topicTest, coordinatesData);
+  //
+  // }
 
   void disconnect(){
     client.disconnect();
   }
 
   void subscribe(String topic) {
-    client.subscribe(topic, MqttQos.atLeastOnce);
+
+      client.subscribe(topic, MqttQos.atLeastOnce);
   }
 
   void onConnected() {
@@ -72,9 +71,9 @@ class MqttConnect {
     client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
 
-  String coordinates(LocationData location) {
-      return "${location.latitude},${location.longitude}";
-    }
+  // String coordinates(Position location) {
+  //     return "${location.latitude},${location.longitude}";
+  //   }
 
 
   Stream<List<MqttReceivedMessage<MqttMessage>>>? getMessagesStream() {
