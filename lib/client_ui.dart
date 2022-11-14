@@ -108,7 +108,7 @@ class _ClientUiState extends State<ClientUi>
               child: currentLocation == null
                   ? const CircularProgressIndicator()
                   : Column(children: [
-                      Center(child: Text("Dane GPS objektu:")),
+                      const Center(child: Text("Dane GPS obiektu:")),
                       Center(
                           child:
                               Text("longitude :${currentLocation?.longitude}")),
