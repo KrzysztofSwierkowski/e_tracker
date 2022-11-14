@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/provider.dart';
+
 import 'mqtt_connect.dart';
 
 class ClientUi extends StatefulWidget {
@@ -100,9 +102,28 @@ class _ClientUiState extends State<ClientUi>
               },
             ),
           ),
-          Center(child: Text("Dane GPS objektu:")),
-          Center(child: Text("longitude :${currentLocation?.longitude}")),
-          Center(child: Text("latitude : ${currentLocation?.latitude}"))
+          Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 25, bottom: 25),
+              child: currentLocation == null
+                  ? const CircularProgressIndicator()
+                  : Column(children: [
+                      Center(child: Text("Dane GPS objektu:")),
+                      Center(
+                          child:
+                              Text("longitude :${currentLocation?.longitude}")),
+                      Center(
+                          child:
+                              Text("latitude : ${currentLocation?.latitude}")),
+                      ElevatedButton(
+                          onPressed: _cancelPositioning,
+                          child: const Text("Zakończ śledzenie")),
+                      ElevatedButton(
+                          onPressed: _reconnect,
+                          child: const Text("Ponów śledzenie")),
+                    ]),
+            ),
+          ),
         ],
       ),
     );
@@ -130,6 +151,10 @@ class _ClientUiState extends State<ClientUi>
       });
     });
   }
+
+  void _cancelPositioning() => {mqttConnect.disconnect()};
+
+  void _reconnect() => {setupMqttClient(), _getNewMessange()};
 
   //Ends Connection
   @override

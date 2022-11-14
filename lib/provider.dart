@@ -22,6 +22,7 @@ class _ProviderState extends State<Provider> {
   String getMessange = '';
   LocationData? currentLocation;
 
+
   // use location plugin to get location and send by the Mqtt
   void getCurrentLocation() async {
     Location location = Location();
@@ -54,7 +55,15 @@ class _ProviderState extends State<Provider> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: currentLocation == null
+          ? const CircularProgressIndicator()
+          : Column(children: [
+              Center(child: Text("Dane GPS objektu:")),
+              Center(child: Text("longitude :${currentLocation?.longitude}")),
+              Center(child: Text("latitude : ${currentLocation?.latitude}"))
+            ]),
+    );
   }
 
   void sendMessage() {
