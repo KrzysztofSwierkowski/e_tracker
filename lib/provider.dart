@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+
 import 'mqtt_connect.dart';
 
 class Provider extends StatefulWidget {
@@ -12,14 +14,15 @@ class Provider extends StatefulWidget {
 }
 
 class _ProviderState extends State<Provider> {
+  //constructors
   MqttConnect mqttConnect = MqttConnect();
   final String pubTopic = "test";
-  String getMessange = '';
-  double a = 0.0;
-  double b = 0.0;
 
+  //variables
+  String getMessange = '';
   LocationData? currentLocation;
 
+  // use location plugin to get location and send by the Mqtt
   void getCurrentLocation() async {
     Location location = Location();
     location.enableBackgroundMode(enable: true);
@@ -45,7 +48,6 @@ class _ProviderState extends State<Provider> {
   @override
   void initState() {
     setupMqttClient();
-    setupUpdatesListener();
     getCurrentLocation();
     super.initState();
   }
@@ -87,20 +89,13 @@ class _ProviderState extends State<Provider> {
     });
   }
 
-  void setupUpdatesListener() {
-    mqttConnect
-        .getMessagesStream()!
-        .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final recMess = c![0].payload as MqttPublishMessage;
-      final pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
-    });
-  }
-
   @override
   void dispose() {
     mqttConnect.disconnect();
     super.dispose();
   }
 }
+
+//todo: implement wantKeepAlive
+//todo: implement constants variable class
+//todo: implement logging system

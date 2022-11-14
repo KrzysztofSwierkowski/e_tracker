@@ -1,19 +1,18 @@
 import 'dart:io';
-import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
+
+import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttConnect {
-
   String UserID() {
-
-  late String userId = generateRandomString(6);
-  print('MQTTClient:: $userId: ');
-return userId;
-}
+    late String userId = generateRandomString(6);
+    print('MQTTClient:: $userId: ');
+    return userId;
+  }
 
   late MqttServerClient client =
-  MqttServerClient.withPort('178.43.119.190', UserID(), 1883);
+      MqttServerClient.withPort('178.43.119.190', UserID(), 1883);
   String topicTest = 'test';
 
   Future<int> connect() async {
@@ -26,7 +25,7 @@ return userId;
     client.pongCallback = pong;
 
     final connMessage =
-    MqttConnectMessage().startClean().withWillQos(MqttQos.atLeastOnce);
+        MqttConnectMessage().startClean().withWillQos(MqttQos.atLeastOnce);
     client.connectionMessage = connMessage;
 
     try {
@@ -42,24 +41,16 @@ return userId;
     return 0;
   }
 
-  // void sendCoord(Position locationData){
-  //   String coordinatesData = coordinates(locationData);
-  //   publishMessage(topicTest, coordinatesData);
-  //
-  // }
-
-  void disconnect(){
+  void disconnect() {
     client.disconnect();
   }
 
   void subscribe(String topic) {
-
-      client.subscribe(topic, MqttQos.atLeastOnce);
+    client.subscribe(topic, MqttQos.atLeastOnce);
   }
 
   void onConnected() {
     print('MQTTClient::Connected');
-
   }
 
   void onDisconnected() {
@@ -80,23 +71,19 @@ return userId;
     client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
 
-  // String coordinates(Position location) {
-  //     return "${location.latitude},${location.longitude}";
-  //   }
-
-
   Stream<List<MqttReceivedMessage<MqttMessage>>>? getMessagesStream() {
     return client.updates;
   }
 
-
-  static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 
   String generateRandomString(int len) {
     var r = Random();
-    const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    const chars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
     return List.generate(len, (index) => chars[r.nextInt(chars.length)]).join();
   }
-
-
 }
+//todo topic name by user name
+//todo secure connection

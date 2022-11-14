@@ -14,7 +14,7 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   int _selectedIndex = 0;
-   static const List<Widget> _widgetOptions = <Widget>[
+  static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     ClientUi(),
     Provider(),

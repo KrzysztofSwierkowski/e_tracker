@@ -20,26 +20,28 @@ String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 
 class _ClientUiState extends State<ClientUi>
     with AutomaticKeepAliveClientMixin {
+  //create a new instance of the used class
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = Provider();
 
-  final String pubTopic = "test";
+  //init a variable
+  final String pubTopic =
+      "test"; //todo make variable topic name associated with user
   String _getMessange = '';
-  double a = 0.0;
-  double b = 0.0;
+  List<LatLng> polylineCoordinates = [];
+  LocationData? currentLocation;
 
   @override
   void initState() {
     setupMqttClient();
-    setupUpdatesListener();
     _getNewMessange();
     getCurrentLocation(_getMessange);
     super.initState();
   }
 
-  List<LatLng> polylineCoordinates = [];
-  LocationData? currentLocation;
-
+// method that converts the received data to the LocationData object,
+// and then updates the currentLocation variable. Next to the method
+// send new camera and marker position by googleMapController
   void getCurrentLocation(String newLocationData) async {
     if (_getMessange.isNotEmpty) {
       Map<String, dynamic> jsonInput = jsonDecode(_getMessange);
@@ -47,15 +49,7 @@ class _ClientUiState extends State<ClientUi>
         'latitude': jsonInput['latitude'],
         'longitude': jsonInput['longitude'],
       });
-//      setState(() {
-      //      this.currentLocation = newLocation;
-      //  });
-      //animateCameraToNewLocation(newLocation);
-      print("po obróbce $newLocation");
 
-      // }
-      //
-      // Future<void> animateCameraToNewLocation(LocationData newLocation) async {
       GoogleMapController googleMapController = await _controller.future;
       if (currentLocation != newLocation) {
         currentLocation = newLocation;
@@ -72,7 +66,6 @@ class _ClientUiState extends State<ClientUi>
           ),
         );
         setState(() {});
-        print('Ostatni etap $currentLocation');
       }
     }
   }
@@ -82,9 +75,7 @@ class _ClientUiState extends State<ClientUi>
     super.build(context);
     getCurrentLocation(_getMessange);
     return Scaffold(
-      body: //SingleChildScrollView(
-          //child:
-          Column(
+      body: Column(
         children: [
           SizedBox(
             height: 500,
@@ -113,16 +104,18 @@ class _ClientUiState extends State<ClientUi>
           Center(child: Text("longitude :${currentLocation?.longitude}")),
           Center(child: Text("latitude : ${currentLocation?.latitude}"))
         ],
-        // ),
       ),
     );
   }
 
+  // ----------------------------------------------------------------
+  // connect to the mqttserver
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
     mqttConnect.subscribe(pubTopic);
   }
 
+  // get mqtt stream messange
   void _getNewMessange() {
     mqttConnect
         .getMessagesStream()!
@@ -138,56 +131,17 @@ class _ClientUiState extends State<ClientUi>
     });
   }
 
-  void setupUpdatesListener() {
-    mqttConnect
-        .getMessagesStream()!
-        .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final recMess = c![0].payload as MqttPublishMessage;
-      final pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
-    });
-  }
-
+  //Ends Connection
   @override
   void dispose() {
     mqttConnect.disconnect();
     super.dispose();
   }
 
+  // allows it to run in the background
   @override
 // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
 
-// void getCurrentLocation() async {
-//   Location location = Location();
-//   location.enableBackgroundMode(enable: true);
-//   location.changeSettings(
-//       accuracy: LocationAccuracy.high, interval: 5000, distanceFilter: 5);
-//   location.getLocation().then(
-//         (location) {
-//       currentLocation = location;
-//     },
-//   );
-//
-//   GoogleMapController googleMapController = await _controller.future;
-//   location.onLocationChanged.listen(
-//         (newLoc) {
-//       currentLocation = newLoc;
-//
-//       googleMapController.animateCamera(
-//         CameraUpdate.newCameraPosition(
-//           CameraPosition(
-//             zoom: 18.5,
-//             target: LatLng(
-//               newLoc.latitude!,
-//               newLoc.longitude!,
-//             ),
-//           ),
-//         ),
-//       );
-//       setState(() {});
-//     },
-//   );
-// }
+//todo create a class with constant values

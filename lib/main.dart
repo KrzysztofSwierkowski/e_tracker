@@ -3,7 +3,7 @@ import 'package:phone_mqtt/menu.dart';
 
 void main() {
   runApp(
-    MyApp(),
+    const MyApp(),
   );
 }
 

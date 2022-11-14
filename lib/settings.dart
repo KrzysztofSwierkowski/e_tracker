@@ -26,3 +26,6 @@ class _SettingsState extends State<Settings> {
     );
   }
 }
+
+//todo theme changer (dark/white)
+//todo account menager
