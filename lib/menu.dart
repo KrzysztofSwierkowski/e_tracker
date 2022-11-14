@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:phone_mqtt/home_page.dart';
 import 'package:phone_mqtt/provider.dart';
+import 'package:phone_mqtt/settings.dart';
 
 import 'client_ui.dart';
-
-
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -14,17 +13,12 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-
+   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     ClientUi(),
     Provider(),
-    Text('data'),
-    //Settings(),
+    Settings(),
   ];
 
   void _onItemTapped(int index) {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:phone_mqtt/menu.dart';
 
-
 void main() {
-  runApp( MyApp(),
+  runApp(
+    MyApp(),
   );
 }
 
@@ -13,12 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
-      theme: ThemeData(
-      ),
+      theme: ThemeData(),
       home: const Menu(),
-
     );
   }
 }
-
