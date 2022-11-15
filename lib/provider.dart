@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-
+import 'package:phone_mqtt/constans.dart' as Constans;
 import 'mqtt_connect.dart';
 
 class Provider extends StatefulWidget {
@@ -16,7 +16,7 @@ class Provider extends StatefulWidget {
 class _ProviderState extends State<Provider> {
   //constructors
   MqttConnect mqttConnect = MqttConnect();
-  final String pubTopic = "test";
+
 
   //variables
   String getMessange = '';
@@ -69,7 +69,7 @@ class _ProviderState extends State<Provider> {
   void sendMessage() {
     if (mqttConnect.client.connectionStatus!.state ==
         MqttConnectionState.connected) {
-      mqttConnect.publishMessage(pubTopic,
+      mqttConnect.publishMessage(Constans.topic,
           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()}}');
     } else {
       setupMqttClient();
@@ -77,12 +77,12 @@ class _ProviderState extends State<Provider> {
   }
 
   void subscribeMessange() {
-    mqttConnect.subscribe(pubTopic);
+    mqttConnect.subscribe(Constans.topic);
   }
 
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
-    mqttConnect.subscribe(pubTopic);
+    mqttConnect.subscribe(Constans.topic);
   }
 
   void getNewMessange() {

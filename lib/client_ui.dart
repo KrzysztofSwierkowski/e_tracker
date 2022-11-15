@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/provider.dart';
+import 'package:phone_mqtt/constans.dart' as Constans;
 
 import 'mqtt_connect.dart';
 
@@ -27,8 +28,7 @@ class _ClientUiState extends State<ClientUi>
   Provider provider = Provider();
 
   //init a variable
-  final String pubTopic =
-      "test"; //todo make variable topic name associated with user
+
   String _getMessange = '';
   List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
@@ -133,7 +133,7 @@ class _ClientUiState extends State<ClientUi>
   // connect to the mqttserver
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
-    mqttConnect.subscribe(pubTopic);
+    mqttConnect.subscribe(Constans.topic);
   }
 
   // get mqtt stream messange

@@ -11,6 +11,8 @@ class MqttConnect {
     return userId;
   }
 
+
+
   late MqttServerClient client =
       MqttServerClient.withPort('178.43.119.190', UserID(), 1883);
   String topicTest = 'test';
@@ -23,9 +25,10 @@ class MqttConnect {
     client.onSubscribed = onSubscribed;
     client.autoReconnect = true;
     client.pongCallback = pong;
+    
 
     final connMessage =
-        MqttConnectMessage().startClean().withWillQos(MqttQos.atLeastOnce);
+        MqttConnectMessage().startClean().withWillQos(MqttQos.atLeastOnce).authenticateAs('rstt', '3333');
     client.connectionMessage = connMessage;
 
     try {
