@@ -24,6 +24,14 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:31.0.3')
+    implementation 'com.google.firebase:firebase-analytics'
+}
 
 android {
     compileSdkVersion 31
