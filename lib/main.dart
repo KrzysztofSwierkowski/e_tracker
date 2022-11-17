@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:phone_mqtt/menu.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'auth/auth.dart';
 import 'auth/firebaseuser.dart';
+import 'auth/login_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
     ),
     // colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.cyan[600]),
     ),
-      home: const Menu(),
+      home: const LoginWrapper(),
     ),);
   }
 }
