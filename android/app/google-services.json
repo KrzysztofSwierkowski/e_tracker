@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "978490303721",
+    "project_id": "mqttphone",
+    "storage_bucket": "mqttphone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978490303721:android:ad3a16630d9d3a04423c78",
+        "android_client_info": {
+          "package_name": "com.rstt.phone_mqtt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "978490303721-ndg90rm779gk7pogeoi9ibvnf9tu34o6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAyp3aTRPvVs7tfSseL1S9lP4rzZyVTsI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "978490303721-ndg90rm779gk7pogeoi9ibvnf9tu34o6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
