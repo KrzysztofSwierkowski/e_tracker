@@ -2,8 +2,8 @@
 class Assets {
   Assets._();
 
-  static const String generatedAssets = 'lib/generated/assets.dart';
-  static const String libHome = 'lib/home_page.dart';
-  static const String libMain = 'lib/main.dart';
+  static const String assetsBackground = 'assets/background.png';
+  static const String assetsIcon = 'assets/icon.png';
+  static const String assetsInapp = 'assets/inapp.png';
 
 }

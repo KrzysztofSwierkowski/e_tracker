@@ -72,32 +72,32 @@ class _LoginPageState extends State<LoginPage> {
         },
         child: const Text('Zarejestruj się'));
 
-    final anonymousLoginButton = Material(
-      elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
-      //color: Theme.of(context).primaryColor,
-      child: OutlinedButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            dynamic result = await _auth.signInAnonymous();
-            if (result.uid == null) {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      content: Text(result.code),
-                    );
-                  });
-            }
-          }
-        },
-        child: Text(
-          "Logowanie anonimowe",
-          //style: TextStyle(color: Theme.of(context).primaryColorDark),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
+    // final anonymousLoginButton = Material(
+    //   elevation: 5.0,
+    //   borderRadius: BorderRadius.circular(30.0),
+    //   //color: Theme.of(context).primaryColor,
+    //   child: OutlinedButton(
+    //     onPressed: () async {
+    //       if (_formKey.currentState!.validate()) {
+    //         dynamic result = await _auth.signInAnonymous();
+    //         if (result.uid == null) {
+    //           showDialog(
+    //               context: context,
+    //               builder: (context) {
+    //                 return AlertDialog(
+    //                   content: Text(result.code),
+    //                 );
+    //               });
+    //         }
+    //       }
+    //     },
+    //     child: Text(
+    //       "Logowanie anonimowe",
+    //       //style: TextStyle(color: Theme.of(context).primaryColorDark),
+    //       textAlign: TextAlign.center,
+    //     ),
+    //   ),
+    // );
 
 
     final loginEmailPasswordButton = Material(
@@ -156,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height:30),
                   loginEmailPasswordButton,
                   const SizedBox(height:30),
-                  anonymousLoginButton,
+                  //anonymousLoginButton,
                   const SizedBox(height: 15.0),
                 ],
               ),

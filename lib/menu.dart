@@ -38,26 +38,26 @@ class _MenuState extends State<Menu> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-            backgroundColor: Colors.red,
+            backgroundColor: Color(0xff2d1010),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.near_me),
             label: 'Client',
-            backgroundColor: Colors.green,
+            backgroundColor: Color(0xff2d1010),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.share_location),
             label: 'Provider',
-            backgroundColor: Colors.purple,
+            backgroundColor: Color(0xff2d1010),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
-            backgroundColor: Colors.pink,
+            backgroundColor: Color(0xff2d1010),
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Color(0xff616161),
         onTap: _onItemTapped,
       ),
     );

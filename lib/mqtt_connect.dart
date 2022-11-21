@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:phone_mqtt/constans.dart';
 
 class MqttConnect {
   String UserID() {
@@ -14,7 +15,7 @@ class MqttConnect {
 
 
   late MqttServerClient client =
-      MqttServerClient.withPort('178.43.119.190', UserID(), 1883);
+      MqttServerClient.withPort(ipBroker, UserID(), 1883);
   String topicTest = 'test';
 
   Future<int> connect() async {

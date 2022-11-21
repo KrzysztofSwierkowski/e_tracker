@@ -15,16 +15,19 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Udostępnianie lokalizacji'),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
-      body: Column(
-        children: const <Widget>[
-          Center(
-            child: Text("lokalizacja wybranego urządzenia"),
-          ),
-        ],
+      child: SafeArea(
+        child: Column(
+          children: const <Widget>[
+            Center(
+              child: Text("lokalizacja wybranego urządzenia"),
+            ),
+          ],
+        ),
       ),
     );
   }

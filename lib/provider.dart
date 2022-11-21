@@ -1,8 +1,10 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+
 import 'mqtt_connect.dart';
 
 class Provider extends StatefulWidget {
@@ -16,11 +18,9 @@ class _ProviderState extends State<Provider> {
   //constructors
   MqttConnect mqttConnect = MqttConnect();
 
-
   //variables
   String getMessange = '';
   LocationData? currentLocation;
-
 
   // use location plugin to get location and send by the Mqtt
   void getCurrentLocation() async {
@@ -58,7 +58,7 @@ class _ProviderState extends State<Provider> {
       child: currentLocation == null
           ? const CircularProgressIndicator()
           : Column(children: [
-              Center(child: Text("Dane GPS objektu:")),
+              const Center(child: Text("Dane GPS objektu:")),
               Center(child: Text("longitude :${currentLocation?.longitude}")),
               Center(child: Text("latitude : ${currentLocation?.latitude}"))
             ]),

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:phone_mqtt/provider.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+import 'package:phone_mqtt/provider.dart';
 
 import 'mqtt_connect.dart';
 
@@ -76,56 +76,63 @@ class _ClientUiState extends State<ClientUi>
   Widget build(BuildContext context) {
     super.build(context);
     getCurrentLocation(_getMessange);
-    return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: 500,
-            child: GoogleMap(
-              mapType: MapType.hybrid,
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(50.9227, 15.7674),
-                zoom: 18,
-              ),
-              myLocationEnabled: true,
-              trafficEnabled: true,
-              markers: currentLocation == null
-                  ? Set()
-                  : {
-                      Marker(
-                          markerId: const MarkerId("1"),
-                          position: LatLng(currentLocation!.latitude!,
-                              currentLocation!.longitude!))
-                    },
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: 25, bottom: 25),
-              child: currentLocation == null
-                  ? const CircularProgressIndicator()
-                  : Column(children: [
-                      const Center(child: Text("Dane GPS obiektu:")),
-                      Center(
-                          child:
-                              Text("longitude :${currentLocation?.longitude}")),
-                      Center(
-                          child:
-                              Text("latitude : ${currentLocation?.latitude}")),
-                      ElevatedButton(
-                          onPressed: _cancelPositioning,
-                          child: const Text("Zakończ śledzenie")),
-                      ElevatedButton(
-                          onPressed: _reconnect,
-                          child: const Text("Ponów śledzenie")),
-                    ]),
-            ),
-          ),
-        ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
+      child: SafeArea(
+        child: Column(
+            children: [
+              SizedBox(
+                height: 500,
+                child: GoogleMap(
+                  mapType: MapType.hybrid,
+                  initialCameraPosition: const CameraPosition(
+                    target: LatLng(50.9227, 15.7674),
+                    zoom: 18,
+                  ),
+                  myLocationEnabled: true,
+                  trafficEnabled: true,
+                  markers: currentLocation == null
+                      ? Set()
+                      : {
+                          Marker(
+                              markerId: const MarkerId("1"),
+                              position: LatLng(currentLocation!.latitude!,
+                                  currentLocation!.longitude!))
+                        },
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                ),
+              ),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 25, bottom: 25),
+                  child: currentLocation == null
+                      ? const CircularProgressIndicator()
+                      : Column(children: [
+                          const Center(child: Text("Dane GPS obiektu:")),
+                          Center(
+                              child: Text(
+                                  "longitude :${currentLocation?.longitude}")),
+                          Center(
+                              child: Text(
+                                  "latitude : ${currentLocation?.latitude}")),
+                          ElevatedButton(
+                              onPressed: _cancelPositioning,
+                              child: const Text("Zakończ śledzenie")),
+                          ElevatedButton(
+                              onPressed: _reconnect,
+                              child: const Text("Ponów śledzenie")),
+                        ]),
+                ),
+              ),
+            ],
+          ),
+        ),
+
     );
   }
 
