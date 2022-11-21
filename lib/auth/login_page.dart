@@ -23,14 +23,14 @@ class _LoginPageState extends State<LoginPage> {
     final emailField = TextFormField(
       controller: _email,
       autofocus: false,
-      validator: (value) {
-        if (value != null) {
-          if (value.contains('@')) {
-            return null;
-          }
-          return 'Wpisz prawidłowy adres e-mail';
-        }
-      },
+      // validator: (value) {
+      //   if (value != null) {
+      //     if (value.contains('@')) {
+      //       return null;
+      //     }
+      //     return 'Wpisz prawidłowy adres e-mail';
+      //   }
+      // },
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         hintText: "Email",
@@ -42,15 +42,15 @@ class _LoginPageState extends State<LoginPage> {
         obscureText: _obscureText,
         controller: _password,
         autofocus: false,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'Pole obowiązkowe !';
-          }
-          if (value.trim().length < 4) {
-            return 'Hasło musi mieć więcej niż 4 znaki';
-          }
-          return null;
-        },
+        // validator: (value) {
+        //   if (value == null || value.trim().isEmpty) {
+        //     return 'Pole obowiązkowe !';
+        //   }
+        //   if (value.trim().length < 4) {
+        //     return 'Hasło musi mieć więcej niż 4 znaki';
+        //   }
+        //   return null;
+        // },
         decoration: InputDecoration(
             contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             hintText: "Hasło",
@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
     final anonymousLoginButton = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
-      color: Theme.of(context).primaryColor,
+      //color: Theme.of(context).primaryColor,
       child: OutlinedButton(
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
         },
         child: Text(
           "Logowanie anonimowe",
-          style: TextStyle(color: Theme.of(context).primaryColorDark),
+          //style: TextStyle(color: Theme.of(context).primaryColorDark),
           textAlign: TextAlign.center,
         ),
       ),
@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
     final loginEmailPasswordButton = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
-      color: Theme.of(context).primaryColor,
+      //color: Theme.of(context).primaryColor,
       child: OutlinedButton(
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
         },
         child: Text(
           "Zaloguj",
-          style: TextStyle(color: Theme.of(context).primaryColorLight),
+          //style: TextStyle(color: Theme.of(context).primaryColorLight),
           textAlign: TextAlign.center,
         ),
       ),
@@ -146,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  anonymousLoginButton,
+
                   const SizedBox(height: 45.0),
                   emailField,
                   const SizedBox(height:30.0),
@@ -155,6 +155,8 @@ class _LoginPageState extends State<LoginPage> {
                   txtbutton,
                   const SizedBox(height:30),
                   loginEmailPasswordButton,
+                  const SizedBox(height:30),
+                  anonymousLoginButton,
                   const SizedBox(height: 15.0),
                 ],
               ),
