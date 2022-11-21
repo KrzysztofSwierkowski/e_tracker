@@ -14,8 +14,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final Singout = Material(
     elevation: 5.0,
-    borderRadius: BorderRadius.circular(30.0),
-    child: OutlinedButton(
+    child: ElevatedButton(
         onPressed: () async {
           await _auth.signOut();
         },
@@ -32,7 +31,7 @@ class _SettingsState extends State<Settings> {
       child: SafeArea(
         child: Column(children: [
           Center(
-            child: Container(child: Singout),
+            child: Singout,
           ),
         ]),
       ),

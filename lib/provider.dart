@@ -25,6 +25,26 @@ class _ProviderState extends State<Provider> {
   // use location plugin to get location and send by the Mqtt
   void getCurrentLocation() async {
     Location location = Location();
+
+    //check location permission (if permission is not granted app crash)
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+
     location.enableBackgroundMode(enable: true);
     location.changeSettings(
         accuracy: LocationAccuracy.high, interval: 5000, distanceFilter: 5);
@@ -54,15 +74,33 @@ class _ProviderState extends State<Provider> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: currentLocation == null
-          ? const CircularProgressIndicator()
-          : Column(children: [
-              const Center(child: Text("Dane GPS objektu:")),
-              Center(child: Text("longitude :${currentLocation?.longitude}")),
-              Center(child: Text("latitude : ${currentLocation?.latitude}"))
-            ]),
-    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
+      ),
+      child: SafeArea(
+          child:
+          Column(
+              children: <Widget>[
+         Container(
+          child: currentLocation == null
+              ? const CircularProgressIndicator()
+              : Column(children: [
+                  const Center(child: Text("Dane GPS objektu:")),
+                  Center(
+                      child: Text("longitude :${currentLocation?.longitude}")),
+                  Center(child: Text("latitude : ${currentLocation?.latitude}"))
+                ]),
+        ),
+        Padding(padding: EdgeInsets.fromLTRB(10, 25, 10, 25),
+    child:
+        Container(
+
+          child: OutlinedButton(onPressed: null, child: Text("Add marker on the Map")),
+        ),),
+      ]),
+    ),);
   }
 
   void sendMessage() {
