@@ -75,7 +75,7 @@ class _ProviderState extends State<Provider> {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         image: DecorationImage(
             image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
@@ -93,12 +93,9 @@ class _ProviderState extends State<Provider> {
                   Center(child: Text("latitude : ${currentLocation?.latitude}"))
                 ]),
         ),
-        Padding(padding: EdgeInsets.fromLTRB(10, 25, 10, 25),
+        const Padding(padding: EdgeInsets.fromLTRB(10, 25, 10, 25),
     child:
-        Container(
-
-          child: OutlinedButton(onPressed: null, child: Text("Add marker on the Map")),
-        ),),
+        ElevatedButton(onPressed: null, child: Text("Add marker on the Map")),),
       ]),
     ),);
   }
