@@ -77,9 +77,9 @@ class _ClientUiState extends State<ClientUi>
     super.build(context);
     getCurrentLocation(_getMessange);
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover, opacity: 0.5,),
       ),
       child: SafeArea(
         child: Column(
