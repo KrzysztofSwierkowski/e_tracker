@@ -4,5 +4,5 @@ Locate your device by this app
   src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png"
   alt="Alt text"
   title="Optional title"
-  style="display: inline-block; margin: 0 auto; max-width: 300px">
-![LOGO](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png)
+  style="display: inline-block; margin: 0 auto; max-width: 50px; max-height:100px ">
+
