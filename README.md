@@ -11,4 +11,4 @@ The application assumes the creation of a device tracking system (phone, gps).
   
   
 
-<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png" width="300" margin-left: auto  margin-right: auto  width: 50%>
+<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png" width="300"; margin-left: auto;  margin-right: auto;  width: 50%;>
