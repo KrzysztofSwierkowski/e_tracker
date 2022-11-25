@@ -11,4 +11,15 @@ The application assumes the creation of a device tracking system (phone, gps).
   
   
 
-<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png" width="300", margin-left: auto,  margin-right: auto>
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/icon.png)" width="300">
+
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.pn](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/localization_login.jpg)" width="300">
+
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/localization_main_screen.jpg)" width="300">
+
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/localization_map.jpg)" width="300">
+
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/localization_provider.jpg)" width="300">
+
+<img src="[https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png](https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/2022_11_25_0575.JPG)" width="300">
+
