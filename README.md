@@ -3,7 +3,7 @@ An application that allows you to share your location.
 The application assumes the creation of a device tracking system (phone, gps).
 
 
-<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/assets/background.png" width="300">
+<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/icon.png" width="300">
 
 
 <h3 align="left">Languages and Tools:</h3>
