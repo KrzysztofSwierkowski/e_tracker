@@ -32,7 +32,7 @@ class _SettingsState extends State<Settings> {
     return DecoratedBox(
       decoration: const BoxDecoration(
         image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover, opacity: 0.5,),
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
         child: Column(children: [

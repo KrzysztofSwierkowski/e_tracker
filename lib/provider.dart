@@ -58,10 +58,8 @@ class _ProviderState extends State<Provider> {
       (newLoc) {
         currentLocation = newLoc;
         currentLocation!.longitude;
-//todo check leaks
         setState(() {
           sendMessage();
-
         });
       },
     );
@@ -79,7 +77,7 @@ class _ProviderState extends State<Provider> {
     return DecoratedBox(
       decoration: const BoxDecoration(
         image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover, opacity: 0.5,),
+            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
           child:
