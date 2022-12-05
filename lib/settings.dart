@@ -12,14 +12,20 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  final Singout = Material(
-    elevation: 5.0,
-    child: ElevatedButton(
-        onPressed: () async {
-          await _auth.signOut();
-        },
-        child: Text('Wyloguj')),
-  );
+  var getIdGps;
+
+  final getIdGpsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    getIdGpsController.addListener(_printLatestValue);
+  }
+
+  void _printLatestValue() {
+    getIdGps = getIdGpsController.text;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +37,28 @@ class _SettingsState extends State<Settings> {
       child: SafeArea(
         child: Column(children: [
           Center(
-            child: Singout,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 25, 0, 25),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    await _auth.signOut();
+                  },
+                  child: const Text('Wyloguj')),
+            ),
           ),
+          const SelectionContainer.disabled(
+              child: Text('Wpisz numer subskrybowanego urządzenia:')),
+          TextField(
+            controller: getIdGpsController,
+          )
         ]),
       ),
     );
+  }
+
+  void dispose() {
+    getIdGpsController.dispose();
+    super.dispose();
   }
 }
 
