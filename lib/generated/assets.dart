@@ -3,7 +3,9 @@ class Assets {
   Assets._();
 
   static const String assetsBackground = 'assets/background.png';
+  static const String assetsHomeBackground = 'assets/HomeBackground.png';
   static const String assetsIcon = 'assets/icon.png';
   static const String assetsInapp = 'assets/inapp.png';
+  static const String assetsLogo = 'assets/logo.jpg';
 
 }
