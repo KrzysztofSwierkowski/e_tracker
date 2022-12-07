@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:phone_mqtt/constans.dart' as Constans;
 import 'auth/auth.dart';
 
 final AuthService _auth = AuthService();
@@ -25,6 +25,7 @@ class _SettingsState extends State<Settings> {
 
   void _printLatestValue() {
     getIdGps = getIdGpsController.text;
+    Constans.deviceIDList.add(getIdGpsController.text);
   }
 
   @override
@@ -50,7 +51,14 @@ class _SettingsState extends State<Settings> {
               child: Text('Wpisz numer subskrybowanego urządzenia:')),
           TextField(
             controller: getIdGpsController,
-          )
+            decoration: InputDecoration(
+              hintText: 'Enter a message',
+              suffixIcon: IconButton(
+                onPressed: getIdGpsController.clear,
+                icon: Icon(Icons.clear),
+              ),
+            ),
+          ),
         ]),
       ),
     );
