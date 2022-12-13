@@ -12,7 +12,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  var getIdGps;
+ // var getIdGps;
 
   final getIdGpsController = TextEditingController();
 
@@ -20,13 +20,13 @@ class _SettingsState extends State<Settings> {
   void initState() {
     super.initState();
 
-    getIdGpsController.addListener(_printLatestValue);
-  }
-
-  void _printLatestValue() {
-    getIdGps = getIdGpsController.text;
-    Constans.deviceIDList.add(getIdGpsController.text);
-  }
+  //   getIdGpsController.addListener(_printLatestValue);
+   }
+  //
+  // void _printLatestValue() {
+  //   getIdGps = getIdGpsController.text;
+  //
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +49,24 @@ class _SettingsState extends State<Settings> {
           ),
           const SelectionContainer.disabled(
               child: Text('Wpisz numer subskrybowanego urządzenia:')),
+          //Row(children: [
           TextField(
             controller: getIdGpsController,
             decoration: InputDecoration(
-              hintText: 'Enter a message',
+              hintText: 'Wpisz ID nowego urządzenia',
               suffixIcon: IconButton(
                 onPressed: getIdGpsController.clear,
                 icon: Icon(Icons.clear),
               ),
             ),
           ),
+            ElevatedButton(
+                onPressed: () async {
+                  Constans.deviceIDList.add(getIdGpsController.text);
+                },
+                child: const Text('Dodaj')
+            ),
+          //]),
         ]),
       ),
     );
