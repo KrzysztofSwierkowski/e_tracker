@@ -40,8 +40,7 @@ class _ClientUiState extends State<ClientUi>
   void initState() {
     setupMqttClient();
     _getNewMessange();
-    getCurrentLocation(_getMessange);
-
+   // getCurrentLocation(_getMessange);
     super.initState();
   }
 
@@ -79,7 +78,7 @@ class _ClientUiState extends State<ClientUi>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    getCurrentLocation(_getMessange);
+   // getCurrentLocation(_getMessange);
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
@@ -161,7 +160,9 @@ class _ClientUiState extends State<ClientUi>
   // connect to the mqttserver
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
-    mqttConnect.subscribe(Constans.topic);
+    for (var i=0; i < Constans.topicList.length; i++) {
+      mqttConnect.subscribe(Constans.topicList[i]);
+    }
   }
 
   // get mqtt stream messange
@@ -191,6 +192,11 @@ class _ClientUiState extends State<ClientUi>
     super.dispose();
   }
 
+  void getSubscriptions(){
+    for (var i=0; i < Constans.topicList.length; i++) {
+      mqttConnect.subscribe(Constans.topicList[i]);
+    }
+  }
   // allows it to run in the background
   @override
 // TODO: implement wantKeepAlive

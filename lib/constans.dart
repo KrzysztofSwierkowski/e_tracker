@@ -12,4 +12,5 @@ String topicIP = "gpsDevice/GPS001/ip";
 
 String ipBroker = "178.43.223.240"; //broker ip address
 List<String> deviceIDList = [];
+List<String> topicList = [];
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};

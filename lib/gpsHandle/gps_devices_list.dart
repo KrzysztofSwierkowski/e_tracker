@@ -65,6 +65,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
                     onDismissed: (DismissDirection direction) {
                       gpsDeviceController.saveDeviceIDList();
                       setState(() {
+                        _remove(items[index]);
                         items.removeAt(index);
                       });
                     },
@@ -92,7 +93,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
                         OutlinedButton(
                             child: Text('Usuń z mapy'),
                             onPressed: () {
-                              _remove(index);
+                              _remove(items[index]);
                             }),
                       ]),
                     ),
@@ -110,6 +111,14 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   MarkerId? selectedMarker;
 
   LatLng? markerPosition;
+  
+  String userPositionMarkerId = Constans.topic;
+  
+  void _addPhone(){
+    if (!Constans.deviceIDList.contains(Constans.topic)) {
+      _add(items.length, Constans.topic);
+    }
+  }
 
   void _add(int _markerIdCounter, String idMarkerValue) {
     final int markerCount = items.length;
@@ -123,8 +132,9 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     final MarkerId markerId = MarkerId(markerIdVal);
 
     String topicLongLat = "gpsDevice/$idMarkerValue/longLat";
+    Constans.topicList.add(topicLongLat);
     mqttConnect.subscribe(topicLongLat);
-
+    gpsDeviceController.saveDeviceIDList();
     final Marker marker = Marker(
       markerId: markerId,
       position: LatLng(50.9227, 15.7674),
@@ -137,8 +147,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     // todo add Map topic and location
   }
 
-  void _remove(markerIdCounterRemove) {
-    var markerId = 'marker_id_$markerIdCounterRemove' as MarkerId;
+  void _remove(markerId) {
     setState(() {
       if (markers.containsKey(markerId)) {
         markers.remove(markerId);
@@ -206,6 +215,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
         markers[markerId] = marker;
       });
       // todo add Map topic and location
+      //todo null exeption handling
 
 
     }

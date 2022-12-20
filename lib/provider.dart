@@ -105,7 +105,7 @@ class _ProviderState extends State<Provider> {
     if (mqttConnect.client.connectionStatus!.state ==
         MqttConnectionState.connected) {
       mqttConnect.publishMessage(Constans.topic,
-          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()}}');
+          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": "${Constans.topic}"}');
     } else {
       setupMqttClient();
     }
