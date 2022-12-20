@@ -8,6 +8,8 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
 
+import 'constans.dart';
+import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
 
 class ClientUi extends StatefulWidget {
@@ -30,6 +32,7 @@ class _ClientUiState extends State<ClientUi>
   //init a variable
 
   String _getMessange = '';
+  String _reciveTopic = '';
   List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
 
@@ -38,6 +41,7 @@ class _ClientUiState extends State<ClientUi>
     setupMqttClient();
     _getNewMessange();
     getCurrentLocation(_getMessange);
+
     super.initState();
   }
 
@@ -76,8 +80,9 @@ class _ClientUiState extends State<ClientUi>
   Widget build(BuildContext context) {
     super.build(context);
     getCurrentLocation(_getMessange);
-    return DecoratedBox(
-      decoration: BoxDecoration(
+    return Container(
+      constraints: const BoxConstraints.expand(),
+      decoration: const BoxDecoration(
         image: DecorationImage(
             image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
@@ -94,14 +99,17 @@ class _ClientUiState extends State<ClientUi>
                 ),
                 myLocationEnabled: true,
                 trafficEnabled: true,
-                markers: currentLocation == null
-                    ? Set()
-                    : {
-                        Marker(
-                            markerId: const MarkerId("1"),
-                            position: LatLng(currentLocation!.latitude!,
-                                currentLocation!.longitude!))
-                      },
+                markers: Set<Marker>.of(markers.values),
+                // markers: currentLocation == null
+                //     ? Set()
+                //     : {
+                //         Marker(
+                //             markerId: const MarkerId("1"),
+                //             position: LatLng(currentLocation!.latitude!,
+                //                 currentLocation!.longitude!)),
+                //
+                //
+                //       },
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
                 },
@@ -111,24 +119,34 @@ class _ClientUiState extends State<ClientUi>
               child: SingleChildScrollView(
                 child: Center(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 25, bottom: 25),
-                    child: currentLocation == null
-                        ? const CircularProgressIndicator()
-                        : Column(children: [
-                            const Center(child: Text("Dane GPS obiektu:")),
-                            Center(
-                                child: Text(
-                                    "longitude :${currentLocation?.longitude}")),
-                            Center(
-                                child: Text(
-                                    "latitude : ${currentLocation?.latitude}")),
-                            ElevatedButton(
-                                onPressed: _cancelPositioning,
-                                child: const Text("Zakończ śledzenie")),
-                            ElevatedButton(
-                                onPressed: _reconnect,
-                                child: const Text("Ponów śledzenie")),
-                          ]),
+                    padding: const EdgeInsets.only(top: 25, bottom: 25),
+                    child:
+                        // currentLocation == null
+                        //     ? const CircularProgressIndicator()
+                        //     :
+                        Column(children: [
+                      const Center(child: Text("Dane GPS obiektu:")),
+                      Center(
+                          child:
+                              Text("longitude :${currentLocation?.longitude}")),
+                      Center(
+                          child:
+                              Text("latitude : ${currentLocation?.latitude}")),
+                      ElevatedButton(
+                          onPressed: _cancelPositioning,
+                          child: const Text("Zakończ śledzenie")),
+                      ElevatedButton(
+                          onPressed: _reconnect,
+                          child: const Text("Ponów śledzenie")),
+                      ElevatedButton(
+                          onPressed: () async {
+                            await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const GpsDevicesList()),
+                            );
+                          },
+                          child: const Text('Pokaż liste urządzeń')),
+                    ]),
                   ),
                 ),
               ),
@@ -156,8 +174,8 @@ class _ClientUiState extends State<ClientUi>
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
-        _getMessange =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        _reciveTopic = c[0].topic;
+        _getMessange = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       });
     });
   }

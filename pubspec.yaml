@@ -45,6 +45,7 @@ dependencies:
   cloud_firestore: ^4.0.5
   flutter_launcher_icons: ^0.11.0
   provider: ^6.0.4
+  json_serializable: ^6.5.4
   firebase_core: ^2.3.0
   shared_preferences: ^2.0.15
   firebase_database: ^10.0.6

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 
 import 'auth/auth.dart';
@@ -19,6 +20,7 @@ class _SettingsState extends State<Settings> {
 
   final getIdGpsController = TextEditingController();
   final getIpMqttBroker = TextEditingController();
+  GpsDeviceController gpsDeviceController = GpsDeviceController();
 
   @override
   void initState() {
@@ -35,68 +37,73 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
+      constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
         image: DecorationImage(
             image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
-        child: Column(children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 25, 0, 25),
+        child: SingleChildScrollView(
+          child: Column(children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
+                child: ElevatedButton(
+                    onPressed: () async {
+                      await _auth.signOut();
+                    },
+                    child: const Text('Wyloguj')),
+              ),
+            ),
+            const SelectionContainer.disabled(
+                child: Text('Wpisz numer subskrybowanego urządzenia:')),
+            //Row(children: [
+            TextField(
+              controller: getIdGpsController,
+              decoration: InputDecoration(
+                hintText: 'Wpisz ID nowego urządzenia',
+                suffixIcon: IconButton(
+                  onPressed: getIdGpsController.clear,
+                  icon: Icon(Icons.clear),
+                ),
+              ),
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  getIdGpsController.clear;
+                  Constans.deviceIDList.add(getIdGpsController.text);
+                  gpsDeviceController.saveDeviceIDList();
+                },
+                child: const Text('Dodaj')),
+            const SelectionContainer.disabled(child: Text('IP MQTT:')),
+            //Row(children: [
+            TextField(
+              controller: getIpMqttBroker,
+              decoration: InputDecoration(
+                hintText: 'Wpisz IP brokera MQTT',
+                suffixIcon: IconButton(
+                  onPressed: getIdGpsController.clear,
+                  icon: const Icon(Icons.clear),
+                ),
+              ),
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  Constans.ipBroker = getIpMqttBroker.text;
+                },
+                child: const Text('Dodaj')),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
               child: ElevatedButton(
                   onPressed: () async {
-                    await _auth.signOut();
+                    _DisplayGpsList(context);
                   },
-                  child: const Text('Wyloguj')),
+                  child: const Text('Pokaż liste urządzeń')),
             ),
-          ),
-          const SelectionContainer.disabled(
-              child: Text('Wpisz numer subskrybowanego urządzenia:')),
-          //Row(children: [
-          TextField(
-            controller: getIdGpsController,
-            decoration: InputDecoration(
-              hintText: 'Wpisz ID nowego urządzenia',
-              suffixIcon: IconButton(
-                onPressed: getIdGpsController.clear,
-                icon: Icon(Icons.clear),
-              ),
-            ),
-          ),
-          ElevatedButton(
-              onPressed: () async {
-                Constans.deviceIDList.add(getIdGpsController.text);
-              },
-              child: const Text('Dodaj')),
-          const SelectionContainer.disabled(child: Text('IP MQTT:')),
-          //Row(children: [
-          TextField(
-            controller: getIpMqttBroker,
-            decoration: InputDecoration(
-              hintText: 'Wpisz IP brokera MQTT',
-              suffixIcon: IconButton(
-                onPressed: getIdGpsController.clear,
-                icon: Icon(Icons.clear),
-              ),
-            ),
-          ),
-          ElevatedButton(
-              onPressed: () async {
-                Constans.ipBroker = getIpMqttBroker.text;
-              },
-              child: const Text('Dodaj')),
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 25, 0, 25),
-            child: ElevatedButton(
-                onPressed: () async {
-                  _DisplayGpsList(context);
-                },
-                child: const Text('Pokaż liste urządzeń')),
-          ),
-          //]),
-        ]),
+            //]),
+          ]),
+        ),
       ),
     );
   }
@@ -111,7 +118,7 @@ class _SettingsState extends State<Settings> {
       showAlertDialog(context);
       print('List is empty.');
     } else {
-      final result = await Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const GpsDevicesList()),
       );
@@ -120,17 +127,16 @@ class _SettingsState extends State<Settings> {
   }
 
   showAlertDialog(BuildContext context) {
-
     // set up the button
     Widget okButton = TextButton(
-      child: Text("OK"),
+      child: const Text("OK"),
       onPressed: () => Navigator.pop(context, 'OK'),
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("brak dodatkowych urządzeń"),
-      content: Text("Aby zobaczyć urządzenia najpierw je dodaj!"),
+      title: const Text("brak dodatkowych urządzeń"),
+      content: const Text("Aby zobaczyć urządzenia najpierw je dodaj!"),
       actions: [
         okButton,
       ],
@@ -144,10 +150,7 @@ class _SettingsState extends State<Settings> {
       },
     );
   }
-
 }
-
-
 
 //todo theme changer (dark/white)
 //todo account menager

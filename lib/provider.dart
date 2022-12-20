@@ -74,7 +74,8 @@ class _ProviderState extends State<Provider> {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
+      constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
         image: DecorationImage(
             image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),

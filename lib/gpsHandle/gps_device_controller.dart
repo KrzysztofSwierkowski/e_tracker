@@ -2,7 +2,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 
-class gpsDeviceController {
+class GpsDeviceController {
   static const String gpsIdDevicesKey = "gpsIdDevices";
 
   void saveDeviceIDList() async {
