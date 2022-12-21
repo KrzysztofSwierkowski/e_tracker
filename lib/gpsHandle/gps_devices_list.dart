@@ -24,7 +24,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
   //create a new instance of the used class
   MqttConnect mqttConnect = MqttConnect();
-  Provider provider = Provider();
+  Provider provider = const Provider();
 
 
   //init a variable
@@ -38,14 +38,14 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   void initState() {
     setupMqttClient();
     _getNewMessange();
-    getCurrentLocation(_getMessange);
+    getNewMarkerLocation(_getMessange);
     super.initState();
   }
 
 
   @override
   Widget build(BuildContext context) {
-    getCurrentLocation(_getMessange);
+    getNewMarkerLocation(_getMessange);
     return Material(
       child: SafeArea(
         child: Column(
@@ -192,9 +192,9 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
 // new location data for the markers:
 
-  void getCurrentLocation(String newLocationData) async {
-    if (_getMessange.isNotEmpty) {
-      Map<String, dynamic> jsonInput = jsonDecode(_getMessange);
+  void getNewMarkerLocation(String getMessange) async {
+    if (getMessange.isNotEmpty) {
+      Map<String, dynamic> jsonInput = jsonDecode(getMessange);
       LocationData newLocation = LocationData.fromMap({
         'latitude': jsonInput['latitude'],
         'longitude': jsonInput['longitude'],
@@ -202,7 +202,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
       // Example input for device: mqttConnect.publishMessage(topicLongLat,
 //           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},\"idGPS\":${idGPS.toString()}}');
-      Map<String, dynamic> jsonInput2 = jsonDecode(_getMessange);
+      Map<String, dynamic> jsonInput2 = jsonDecode(getMessange);
       final String markerIdVal = jsonInput2['idGPS'];
       final MarkerId markerId = MarkerId(markerIdVal);
       final Marker marker = Marker(

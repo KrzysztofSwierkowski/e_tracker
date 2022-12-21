@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
-
-import 'constans.dart';
 import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
+import 'package:phone_mqtt/gpsHandle/gps_devices_list.dart' as GpsHandle;
 
 class ClientUi extends StatefulWidget {
   const ClientUi({Key? key}) : super(key: key);
@@ -21,13 +19,15 @@ class ClientUi extends StatefulWidget {
 
 final Completer<GoogleMapController> _controller = Completer();
 
-String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
+String google_api_key = Constans.google_api_key;
 
 class _ClientUiState extends State<ClientUi>
     with AutomaticKeepAliveClientMixin {
   //create a new instance of the used class
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = Provider();
+
+
 
   //init a variable
 
@@ -40,6 +40,7 @@ class _ClientUiState extends State<ClientUi>
   void initState() {
     setupMqttClient();
     _getNewMessange();
+    getNewMarkerLocation(_getMessange);
    // getCurrentLocation(_getMessange);
     super.initState();
   }
@@ -98,7 +99,7 @@ class _ClientUiState extends State<ClientUi>
                 ),
                 myLocationEnabled: true,
                 trafficEnabled: true,
-                markers: Set<Marker>.of(markers.values),
+                markers: Set<Marker>.of(Constans.markers.values),
                 // markers: currentLocation == null
                 //     ? Set()
                 //     : {
@@ -185,6 +186,41 @@ class _ClientUiState extends State<ClientUi>
 
   void _reconnect() => {setupMqttClient(), _getNewMessange()};
 
+
+
+
+  void getNewMarkerLocation(String getMessange) async {
+    if (getMessange.isNotEmpty) {
+      Map<String, dynamic> jsonInput = jsonDecode(getMessange);
+      LocationData newLocation = LocationData.fromMap({
+        'latitude': jsonInput['latitude'],
+        'longitude': jsonInput['longitude'],
+      });
+
+      // Example input for device: mqttConnect.publishMessage(topicLongLat,
+//           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},\"idGPS\":${idGPS.toString()}}');
+      Map<String, dynamic> jsonInput2 = jsonDecode(getMessange);
+      final String markerIdVal = jsonInput2['idGPS'];
+      final MarkerId markerId = MarkerId(markerIdVal);
+      final Marker marker = Marker(
+        markerId: markerId,
+        position: LatLng(newLocation.latitude!, newLocation.longitude!),
+        infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
+      );
+
+      setState(() {
+        Constans.markers[markerId] = marker;
+      });
+      // todo add Map topic and location
+      //todo null exeption handling
+
+
+    }
+  }
+
+
+
+
   //Ends Connection
   @override
   void dispose() {
@@ -192,11 +228,12 @@ class _ClientUiState extends State<ClientUi>
     super.dispose();
   }
 
-  void getSubscriptions(){
-    for (var i=0; i < Constans.topicList.length; i++) {
-      mqttConnect.subscribe(Constans.topicList[i]);
-    }
-  }
+
+
+
+
+
+
   // allows it to run in the background
   @override
 // TODO: implement wantKeepAlive

@@ -14,3 +14,4 @@ String ipBroker = "178.43.223.240"; //broker ip address
 List<String> deviceIDList = [];
 List<String> topicList = [];
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
