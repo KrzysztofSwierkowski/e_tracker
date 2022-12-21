@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -21,6 +20,10 @@ class _ProviderState extends State<Provider> {
   //variables
   String getMessange = '';
   LocationData? currentLocation;
+
+  //Controllers:
+
+  TextEditingController getDeviceNameController = TextEditingController();
 
   // use location plugin to get location and send by the Mqtt
   void getCurrentLocation() async {
@@ -44,7 +47,6 @@ class _ProviderState extends State<Provider> {
       }
     }
 
-
     location.enableBackgroundMode(enable: true);
     location.changeSettings(
         accuracy: LocationAccuracy.high, interval: 5000, distanceFilter: 5);
@@ -59,7 +61,7 @@ class _ProviderState extends State<Provider> {
         currentLocation = newLoc;
         currentLocation!.longitude;
         setState(() {
-          sendMessage();
+          sendLocalizationMessage();
         });
       },
     );
@@ -81,31 +83,58 @@ class _ProviderState extends State<Provider> {
             image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
-          child:
-          Column(
-              children: <Widget>[
-         Container(
-          child: currentLocation == null
-              ? const CircularProgressIndicator()
-              : Column(children: [
-                  const Center(child: Text("Dane GPS objektu:")),
-                  Center(
-                      child: Text("longitude :${currentLocation?.longitude}")),
-                  Center(child: Text("latitude : ${currentLocation?.latitude}"))
-                ]),
-        ),
-        const Padding(padding: EdgeInsets.fromLTRB(10, 25, 10, 25),
-    child:
-        ElevatedButton(onPressed: null, child: Text("Add marker on the Map")),),
-      ]),
-    ),);
+        child: Column(children: <Widget>[
+          Container(
+            child: currentLocation == null
+                ? const CircularProgressIndicator()
+                : Column(children: [
+                    const Center(child: Text("Dane GPS objektu:")),
+                    Center(
+                        child:
+                            Text("longitude :${currentLocation?.longitude}")),
+                    Center(
+                        child: Text("latitude : ${currentLocation?.latitude}"))
+                  ]),
+          ),
+          TextField(
+            controller: getDeviceNameController,
+            decoration: InputDecoration(
+              hintText: 'Wpisz nazwę swojego urządzenia',
+              suffixIcon: IconButton(
+                onPressed: getDeviceNameController.clear,
+                icon: const Icon(Icons.clear),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 25, 10, 25),
+            child: OutlinedButton(
+                child: const Text('Udostępnij lokalizację'),
+                onPressed: () {
+                  _sendDeviceNameMessage();
+                  _addDeviceToTopicAndDevicesLists();
+                }),
+          ),
+        ]),
+      ),
+    );
   }
 
-  void sendMessage() {
+  void sendLocalizationMessage() {
+    if (mqttConnect.client.connectionStatus!.state ==
+        MqttConnectionState.connected) {
+      mqttConnect.publishMessage(getDeviceNameController.text,
+          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
+    } else {
+      setupMqttClient();
+    }
+  }
+
+  void _sendDeviceNameMessage() {
     if (mqttConnect.client.connectionStatus!.state ==
         MqttConnectionState.connected) {
       mqttConnect.publishMessage(Constans.topic,
-          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": "${Constans.topic}"}');
+          getDeviceNameController.text);
     } else {
       setupMqttClient();
     }
@@ -113,6 +142,11 @@ class _ProviderState extends State<Provider> {
 
   void subscribeMessange() {
     mqttConnect.subscribe(Constans.topic);
+  }
+
+  Future<void> _addDeviceToTopicAndDevicesLists() async {
+     Constans.topicList.add(getDeviceNameController.text);
+    Constans.deviceIDList.add(getDeviceNameController.text);
   }
 
   Future<void> setupMqttClient() async {

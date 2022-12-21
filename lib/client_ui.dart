@@ -6,9 +6,8 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
-import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
-import 'package:phone_mqtt/gpsHandle/gps_devices_list.dart' as GpsHandle;
+
 
 class ClientUi extends StatefulWidget {
   const ClientUi({Key? key}) : super(key: key);
@@ -48,7 +47,7 @@ class _ClientUiState extends State<ClientUi>
 // method that converts the received data to the LocationData object,
 // and then updates the currentLocation variable. Next to the method
 // send new camera and marker position by googleMapController
-  void getCurrentLocation(String newLocationData) async {
+  void getViewOnSelectedMarker(String newLocationData) async {
     if (_getMessange.isNotEmpty) {
       Map<String, dynamic> jsonInput = jsonDecode(_getMessange);
       LocationData newLocation = LocationData.fromMap({
@@ -80,6 +79,7 @@ class _ClientUiState extends State<ClientUi>
   Widget build(BuildContext context) {
     super.build(context);
    // getCurrentLocation(_getMessange);
+    getNewMarkerLocation(_getMessange);
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
@@ -138,14 +138,14 @@ class _ClientUiState extends State<ClientUi>
                       ElevatedButton(
                           onPressed: _reconnect,
                           child: const Text("Ponów śledzenie")),
-                      ElevatedButton(
-                          onPressed: () async {
-                            await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const GpsDevicesList()),
-                            );
-                          },
-                          child: const Text('Pokaż liste urządzeń')),
+                      // ElevatedButton(
+                      //     onPressed: () async {
+                      //       await Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(builder: (context) => const GpsDevicesList()),
+                      //       );
+                      //     },
+                      //     child: const Text('Pokaż liste urządzeń')),
                     ]),
                   ),
                 ),
@@ -162,6 +162,7 @@ class _ClientUiState extends State<ClientUi>
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
     for (var i=0; i < Constans.topicList.length; i++) {
+      mqttConnect.subscribe(Constans.topic);
       mqttConnect.subscribe(Constans.topicList[i]);
     }
   }
@@ -176,9 +177,17 @@ class _ClientUiState extends State<ClientUi>
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
-        _reciveTopic = c[0].topic;
-        _getMessange = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      });
+        if (c[0].topic == Constans.topic){
+          Constans.deviceIDList.add(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
+          Constans.topicList.add(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
+          mqttConnect.subscribe(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
+        }
+        else {
+          _reciveTopic = c[0].topic;
+          _getMessange =
+              MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        }
+        });
     });
   }
 

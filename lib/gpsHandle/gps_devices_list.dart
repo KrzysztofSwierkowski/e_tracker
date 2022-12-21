@@ -94,6 +94,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
                             child: Text('Usuń z mapy'),
                             onPressed: () {
                               _remove(items[index]);
+
                             }),
                       ]),
                     ),
@@ -148,6 +149,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   }
 
   void _remove(markerId) {
+    Constans.topicList.remove(markerId);
     setState(() {
       if (markers.containsKey(markerId)) {
         markers.remove(markerId);
