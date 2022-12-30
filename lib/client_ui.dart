@@ -31,7 +31,7 @@ class _ClientUiState extends State<ClientUi>
   //init a variable
 
   String _getMessange = '';
-  String _reciveTopic = '';
+  //String _reciveTopic = '';
   List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
 
@@ -83,8 +83,10 @@ class _ClientUiState extends State<ClientUi>
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
+        color: Color(0xff000000),
+        //image: DecorationImage(
+        //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
+
       ),
       child: SafeArea(
         child: Column(
@@ -119,25 +121,27 @@ class _ClientUiState extends State<ClientUi>
               child: SingleChildScrollView(
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 25, bottom: 25),
+                    padding: const EdgeInsets.only(top: 5, bottom: 25),
                     child:
                         // currentLocation == null
                         //     ? const CircularProgressIndicator()
                         //     :
                         Column(children: [
-                      const Center(child: Text("Dane GPS obiektu:")),
-                      Center(
-                          child:
-                              Text("longitude :${currentLocation?.longitude}")),
-                      Center(
-                          child:
-                              Text("latitude : ${currentLocation?.latitude}")),
+                      // const Center(child: Text("Dane GPS obiektu:")),
+                      // Center(
+                      //     child:
+                      //         Text("longitude :${currentLocation?.longitude}")),
+                      // Center(
+                      //     child:
+                      //         Text("latitude : ${currentLocation?.latitude}")),
                       ElevatedButton(
+                        style: Constans.yellowButtonStyle,
                           onPressed: _cancelPositioning,
-                          child: const Text("Zakończ śledzenie")),
+                          child: const Text("Zakończ śledzenie", style: Constans.blackTextStyleForYellowButton)),
                       ElevatedButton(
+                          style: Constans.yellowButtonStyle,
                           onPressed: _reconnect,
-                          child: const Text("Ponów śledzenie")),
+                          child: const Text("Ponów śledzenie", style: Constans.blackTextStyleForYellowButton)),
                       // ElevatedButton(
                       //     onPressed: () async {
                       //       await Navigator.push(
@@ -183,7 +187,7 @@ class _ClientUiState extends State<ClientUi>
           mqttConnect.subscribe(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
         }
         else {
-          _reciveTopic = c[0].topic;
+          //_reciveTopic = c[0].topic;
           _getMessange =
               MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         }

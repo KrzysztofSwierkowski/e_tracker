@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 
 import 'auth/auth.dart';
 import 'constans.dart';
@@ -40,8 +40,9 @@ class _SettingsState extends State<Settings> {
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
+        color: Color(0xff000000),
+        //image: DecorationImage(
+        //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -50,19 +51,34 @@ class _SettingsState extends State<Settings> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
                 child: ElevatedButton(
+                    style: Constans.yellowButtonStyle,
                     onPressed: () async {
                       await _auth.signOut();
                     },
-                    child: const Text('Wyloguj')),
+                    child: const Text(
+                      'Wyloguj',
+                      style: Constans.blackTextStyleForYellowButton,
+                    )),
               ),
             ),
             const SelectionContainer.disabled(
-                child: Text('Wpisz numer subskrybowanego urządzenia:')),
+                child: Text(
+              'Wpisz numer subskrybowanego urządzenia:',
+              style: Constans.whiteTextStyle,
+            )),
             //Row(children: [
             TextField(
+              style: Constans.whiteTextStyle,
               controller: getIdGpsController,
               decoration: InputDecoration(
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
                 hintText: 'Wpisz ID nowego urządzenia',
+                hintStyle: Constans.whiteHintTextStyle15px,
                 suffixIcon: IconButton(
                   onPressed: getIdGpsController.clear,
                   icon: Icon(Icons.clear),
@@ -70,36 +86,62 @@ class _SettingsState extends State<Settings> {
               ),
             ),
             ElevatedButton(
+                style: Constans.yellowButtonStyle,
                 onPressed: () async {
                   getIdGpsController.clear;
                   Constans.deviceIDList.add(getIdGpsController.text);
                   gpsDeviceController.saveDeviceIDList();
+                  getIdGpsController.clear;
                 },
-                child: const Text('Dodaj')),
-            const SelectionContainer.disabled(child: Text('IP MQTT:')),
+                child: const Text(
+                  'Dodaj',
+                  style: Constans.blackTextStyleForYellowButton,
+                )),
+            const SelectionContainer.disabled(
+                child: Text(
+              'IP MQTT:',
+              style: Constans.whiteTextStyle,
+            )),
             //Row(children: [
             TextField(
+              style: Constans.whiteTextStyle,
               controller: getIpMqttBroker,
               decoration: InputDecoration(
                 hintText: 'Wpisz IP brokera MQTT',
+                hintStyle: Constans.whiteHintTextStyle15px,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
                 suffixIcon: IconButton(
-                  onPressed: getIdGpsController.clear,
+                  onPressed: getIpMqttBroker.clear,
                   icon: const Icon(Icons.clear),
                 ),
               ),
             ),
             ElevatedButton(
+                style: Constans.yellowButtonStyle,
                 onPressed: () async {
                   Constans.ipBroker = getIpMqttBroker.text;
+                  getIdGpsController.clear;
                 },
-                child: const Text('Dodaj')),
+                child: const Text(
+                  'Dodaj',
+                  style: Constans.blackTextStyleForYellowButton,
+                )),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
               child: ElevatedButton(
+                  style: Constans.yellowButtonStyle,
                   onPressed: () async {
                     _DisplayGpsList(context);
                   },
-                  child: const Text('Pokaż liste urządzeń')),
+                  child: const Text(
+                    'Pokaż liste urządzeń',
+                    style: Constans.blackTextStyleForYellowButton,
+                  )),
             ),
             //]),
           ]),

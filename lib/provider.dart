@@ -1,9 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 
+import 'constans.dart';
 import 'mqtt_connect.dart';
 
 class Provider extends StatefulWidget {
@@ -16,7 +19,7 @@ class Provider extends StatefulWidget {
 class _ProviderState extends State<Provider> {
   //constructors
   MqttConnect mqttConnect = MqttConnect();
-
+  GpsDeviceController gpsDeviceController = GpsDeviceController();
   //variables
   String getMessange = '';
   LocationData? currentLocation;
@@ -32,6 +35,7 @@ class _ProviderState extends State<Provider> {
     //check location permission (if permission is not granted app crash)
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
+
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -60,6 +64,7 @@ class _ProviderState extends State<Provider> {
       (newLoc) {
         currentLocation = newLoc;
         currentLocation!.longitude;
+        currentLocation!.speed;
         setState(() {
           sendLocalizationMessage();
         });
@@ -69,6 +74,7 @@ class _ProviderState extends State<Provider> {
 
   @override
   void initState() {
+
     setupMqttClient();
     getCurrentLocation();
     super.initState();
@@ -79,42 +85,109 @@ class _ProviderState extends State<Provider> {
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("assets/inapp.png"), fit: BoxFit.cover),
+        color: Color(0xff000000),
+        //image: DecorationImage(
+        //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
       ),
       child: SafeArea(
         child: Column(children: <Widget>[
+          const Divider(
+            color: Color(0xffFFF800),
+            height: 20,
+          ),
           Container(
             child: currentLocation == null
                 ? const CircularProgressIndicator()
                 : Column(children: [
-                    const Center(child: Text("Dane GPS objektu:")),
+                    const Center(
+                        child: Text(
+                      "Dane GPS:",
+                      style: Constans.whiteTextStyle,
+                    )),
                     Center(
-                        child:
-                            Text("longitude :${currentLocation?.longitude}")),
+                        child: Text(
+                      "longitude :${currentLocation?.longitude}",
+                      style: Constans.whiteTextStyle,
+                    )),
+
                     Center(
-                        child: Text("latitude : ${currentLocation?.latitude}"))
+                        child: Text(
+                      "latitude : ${currentLocation?.latitude}",
+                      style: Constans.whiteTextStyle,
+                    )),
+              Center(
+                  child: Text(
+                    "Prędkość : ${(currentLocation!.speed! * 3.6).toStringAsFixed(1)} Km/h",
+                    style: Constans.whiteTextStyle,
+                  )),
+              Center(
+                  child: Text(
+                    "Wysokość : ${(currentLocation!.altitude! * 3.6).toStringAsFixed(1)} mnpm",
+                    style: Constans.whiteTextStyle,
+                  )),
+              Center(
+                  child: Text(
+                    "dokładność : ${(currentLocation!.accuracy! * 3.6).toStringAsFixed(1)} m",
+                    style: Constans.whiteTextStyle,
+                  ))
                   ]),
           ),
-          TextField(
-            controller: getDeviceNameController,
-            decoration: InputDecoration(
-              hintText: 'Wpisz nazwę swojego urządzenia',
-              suffixIcon: IconButton(
-                onPressed: getDeviceNameController.clear,
-                icon: const Icon(Icons.clear),
+          const Divider(
+            color: Color(0xffFFF800),
+            height: 40,
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 0, 0, 25),
+            child: TextField(
+              style: Constans.whiteTextStyle,
+              controller: getDeviceNameController,
+              decoration: InputDecoration(
+                hintText: 'Wpisz nazwę swojego urządzenia',
+                hintStyle: Constans.whiteHintTextStyle15px,
+                suffixIcon: IconButton(
+                  onPressed: getDeviceNameController.clear,
+                  icon: const Icon(Icons.clear),
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 25, 10, 25),
-            child: OutlinedButton(
-                child: const Text('Udostępnij lokalizację'),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 25),
+            child: ElevatedButton(
+                style: Constans.yellowButtonStyle,
+                child: const Text(
+                  'Udostępnij lokalizację',
+                  style: Constans.blackTextStyleForYellowButton,
+                ),
                 onPressed: () {
+                  Constans.topicCurrentDeviceName =
+                      getDeviceNameController.text;
+                  gpsDeviceController.saveCurrentDeviceNameKey();
                   _sendDeviceNameMessage();
                   _addDeviceToTopicAndDevicesLists();
+                  getDeviceNameController.clear;
+                  setState(() {
+
+                  });
                 }),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 25),
+            child: ElevatedButton(
+                style: Constans.yellowButtonStyle,
+                child: const Text(
+                  'Wyślij lokalizację tylko raz',
+                  style: Constans.blackTextStyleForYellowButton,
+                ),
+                onPressed: () {
+                  sendLocalizationMessage();
+                  setState(() {
+
+                  });
+                }),
+          ),
+          const Text("Obecna nazwa urządzenia to:",style: whiteTextStyle,),
+          Text(Constans.topicCurrentDeviceName, style: whiteTextStyle,)
         ]),
       ),
     );
@@ -122,8 +195,9 @@ class _ProviderState extends State<Provider> {
 
   void sendLocalizationMessage() {
     if (mqttConnect.client.connectionStatus!.state ==
-        MqttConnectionState.connected) {
-      mqttConnect.publishMessage(getDeviceNameController.text,
+            MqttConnectionState.connected &&
+        Constans.topicCurrentDeviceName != null) {
+      mqttConnect.publishMessage(Constans.topicCurrentDeviceName,
           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
     } else {
       setupMqttClient();
@@ -133,8 +207,8 @@ class _ProviderState extends State<Provider> {
   void _sendDeviceNameMessage() {
     if (mqttConnect.client.connectionStatus!.state ==
         MqttConnectionState.connected) {
-      mqttConnect.publishMessage(Constans.topic,
-          getDeviceNameController.text);
+      mqttConnect.publishMessage(
+          Constans.topic, Constans.topicCurrentDeviceName);
     } else {
       setupMqttClient();
     }
@@ -145,8 +219,8 @@ class _ProviderState extends State<Provider> {
   }
 
   Future<void> _addDeviceToTopicAndDevicesLists() async {
-     Constans.topicList.add(getDeviceNameController.text);
-    Constans.deviceIDList.add(getDeviceNameController.text);
+    Constans.topicList.add(Constans.topicCurrentDeviceName);
+    Constans.deviceIDList.add(Constans.topicCurrentDeviceName);
   }
 
   Future<void> setupMqttClient() async {
