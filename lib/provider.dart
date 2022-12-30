@@ -199,6 +199,8 @@ class _ProviderState extends State<Provider> {
         Constans.topicCurrentDeviceName != null) {
       mqttConnect.publishMessage(Constans.topicCurrentDeviceName,
           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
+      mqttConnect.publishMessage("gpsDevice/${Constans.topicCurrentDeviceName}/longLat",
+          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
     } else {
       setupMqttClient();
     }
@@ -214,10 +216,6 @@ class _ProviderState extends State<Provider> {
     }
   }
 
-  void subscribeMessange() {
-    mqttConnect.subscribe(Constans.topic);
-  }
-
   Future<void> _addDeviceToTopicAndDevicesLists() async {
     Constans.topicList.add(Constans.topicCurrentDeviceName);
     Constans.deviceIDList.add(Constans.topicCurrentDeviceName);
@@ -226,6 +224,7 @@ class _ProviderState extends State<Provider> {
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
     mqttConnect.subscribe(Constans.topic);
+    mqttConnect.subscribe("gpsDevice/${Constans.topicCurrentDeviceName}/longLat");
   }
 
   void getNewMessange() {
@@ -248,6 +247,4 @@ class _ProviderState extends State<Provider> {
   }
 }
 
-//todo: implement wantKeepAlive
-//todo: implement constants variable class
-//todo: implement logging system
+//todo repair add another device

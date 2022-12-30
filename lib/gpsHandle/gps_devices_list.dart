@@ -132,7 +132,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     _markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
-    String topicLongLat = "gpsDevice/$idMarkerValue/longLat";
+    String topicLongLat = "gpsDevice/$idMarkerValue/longLat"; //todo tu jest problem z dodawaniem telefonu
     Constans.topicList.add(topicLongLat);
     mqttConnect.subscribe(topicLongLat);
     gpsDeviceController.saveDeviceIDList();
