@@ -10,7 +10,6 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/provider.dart';
 
-
 class GpsDevicesList extends StatefulWidget {
   const GpsDevicesList({super.key});
 
@@ -26,13 +25,11 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = const Provider();
 
-
   //init a variable
 
   String _getMessange = '';
   List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
-
 
   @override
   void initState() {
@@ -41,7 +38,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     getNewMarkerLocation(_getMessange);
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,50 +53,52 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
             Container(
               child: items.isNotEmpty
                   ? ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Dismissible(
-                    onDismissed: (DismissDirection direction) {
-                      gpsDeviceController.saveDeviceIDList();
-                      setState(() {
-                        _remove(items[index]);
-                        items.removeAt(index);
-                      });
-                    },
-                    secondaryBackground: Container(
-                      color: Colors.red,
-                      child: const Center(
-                        child: Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    background: Container(),
-                    key: UniqueKey(),
-                    direction: DismissDirection.endToStart,
-                    child: ListTile(
-                      leading: const Icon(Icons.list),
-                      title: Text(items[index]),
-                      subtitle: Row(children: <Widget>[
-                        OutlinedButton(
-                            child: Text('Dodaj do mapy'),
-                            onPressed: () {
-                              _add(index, items[index]);
-                            }),
-                        OutlinedButton(
-                            child: Text('Usuń z mapy'),
-                            onPressed: () {
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Dismissible(
+                          onDismissed: (DismissDirection direction) {
+                            gpsDeviceController.saveDeviceIDList();
+                            setState(() {
                               _remove(items[index]);
-
-                            }),
-                      ]),
-                    ),
-                  );
-                },
-              )
+                              items.removeAt(index);
+                            });
+                          },
+                          secondaryBackground: Container(
+                            color: Colors.red,
+                            child: const Center(
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          background: Container(),
+                          key: UniqueKey(),
+                          direction: DismissDirection.endToStart,
+                          child: ListTile(
+                            leading: const Icon(Icons.list),
+                            title: Text(items[index]),
+                            subtitle: Row(children: <Widget>[
+                              OutlinedButton(
+                                  child: Text('Dodaj do mapy'),
+                                  onPressed: () {
+                                    _add(index, items[index]);
+                                    setState(() {});
+                                  }),
+                              OutlinedButton(
+                                  child: Text('Usuń z bazy'),
+                                  onPressed: () {
+                                    setState(() {
+                                      _remove(items[index]);
+                                    });
+                                  }),
+                            ]),
+                          ),
+                        );
+                      },
+                    )
                   : const Center(child: Text('Brak urządzeń')),
             ),
           ],
@@ -112,27 +110,28 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   MarkerId? selectedMarker;
 
   LatLng? markerPosition;
-  
+
   String userPositionMarkerId = Constans.topic;
-  
-  void _addPhone(){
+
+  void _addPhone() {
     if (!Constans.deviceIDList.contains(Constans.topic)) {
       _add(items.length, Constans.topic);
     }
   }
 
-  void _add(int _markerIdCounter, String idMarkerValue) {
+  void _add(int markerIdCounter, String idMarkerValue) {
     final int markerCount = items.length;
 
-    if (markerCount == 12) {
+    if (markerCount == 30) {
       return;
     }
 
     final String markerIdVal = idMarkerValue;
-    _markerIdCounter++;
+    markerIdCounter++;
     final MarkerId markerId = MarkerId(markerIdVal);
 
-    String topicLongLat = "gpsDevice/$idMarkerValue/longLat"; //todo tu jest problem z dodawaniem telefonu
+    String topicLongLat =
+        "gpsDevice/$idMarkerValue/longLat"; //todo tu jest problem z dodawaniem telefonu
     Constans.topicList.add(topicLongLat);
     mqttConnect.subscribe(topicLongLat);
     gpsDeviceController.saveDeviceIDList();
@@ -154,9 +153,12 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
       if (markers.containsKey(markerId)) {
         markers.remove(markerId);
       }
+      markers.removeWhere((key,marker) => marker.markerId.value == "001");
+      setState(() {
+        markers.remove(markerId);
+      });
     });
   }
-
 
   // ----------------------------------------------------------------
   // connect to the mqttserver
@@ -171,7 +173,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       late final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
         _getMessange =
@@ -190,7 +192,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     mqttConnect.disconnect();
     super.dispose();
   }
-
 
 // new location data for the markers:
 
@@ -218,7 +219,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
       });
       // todo add Map topic and location
       //todo null exeption handling
-
 
     }
   }

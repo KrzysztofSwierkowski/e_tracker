@@ -91,7 +91,7 @@ class _SettingsState extends State<Settings> {
                   getIdGpsController.clear;
                   Constans.deviceIDList.add(getIdGpsController.text);
                   gpsDeviceController.saveDeviceIDList();
-                  getIdGpsController.clear;
+                  getIdGpsController.clear();
                 },
                 child: const Text(
                   'Dodaj',
@@ -125,7 +125,7 @@ class _SettingsState extends State<Settings> {
                 style: Constans.yellowButtonStyle,
                 onPressed: () async {
                   Constans.ipBroker = getIpMqttBroker.text;
-                  getIdGpsController.clear;
+                  getIpMqttBroker.clear();
                 },
                 child: const Text(
                   'Dodaj',

@@ -56,6 +56,7 @@ class _ClientUiState extends State<ClientUi>
       });
 
       GoogleMapController googleMapController = await _controller.future;
+
       if (currentLocation != newLocation) {
         currentLocation = newLocation;
 
@@ -114,6 +115,9 @@ class _ClientUiState extends State<ClientUi>
                 //       },
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
+                  setState(() {
+
+                  });
                 },
               ),
             ),
@@ -198,8 +202,6 @@ class _ClientUiState extends State<ClientUi>
   void _cancelPositioning() => {mqttConnect.disconnect()};
 
   void _reconnect() => {setupMqttClient(), _getNewMessange()};
-
-
 
 
   void getNewMarkerLocation(String getMessange) async {
