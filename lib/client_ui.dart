@@ -233,6 +233,12 @@ class _ClientUiState extends State<ClientUi>
     }
   }
 
+  Future<void> _unSubscribeAllTopics() async {
+    for (var i=0; i < Constans.topicList.length; i++) {
+      mqttConnect.client.unsubscribe(Constans.topicList[i]);
+    }
+  }
+
 
 
 
@@ -240,6 +246,7 @@ class _ClientUiState extends State<ClientUi>
   @override
   void dispose() {
     mqttConnect.disconnect();
+    _unSubscribeAllTopics();
     super.dispose();
   }
 
