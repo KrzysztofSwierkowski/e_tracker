@@ -1,42 +1,6 @@
-/**************************************************************
-
-   For this example, you need to install PubSubClient library:
-     https://github.com/knolleary/pubsubclient
-     or from http://librarymanager/all#PubSubClient
-
-   TinyGSM Getting Started guide:
-     https://tiny.cc/tinygsm-readme
-
-   For more MQTT examples, see PubSubClient library
-
- **************************************************************
-   Use Mosquitto client tools to work with MQTT
-     Ubuntu/Linux: sudo apt-get install mosquitto-clients
-     Windows:      https://mosquitto.org/download/
-
-   Subscribe for messages:
-     mosquitto_sub -h test.mosquitto.org -t GsmClientTest/init -t GsmClientTest/ledStatus -q 1
-   Toggle led:
-     mosquitto_pub -h test.mosquitto.org -t GsmClientTest/led -q 1 -m "toggle"
-
-   You can use Node-RED for wiring together MQTT-enabled devices
-     https://nodered.org/
-   Also, take a look at these additional Node-RED modules:
-     node-red-contrib-blynk-ws
-     node-red-dashboard
-
- **************************************************************/
-
-// Please select the corresponding model
-
 #define SIM800L_IP5306_VERSION_20190610
-// #define SIM800L_AXP192_VERSION_20200327
-// #define SIM800C_AXP192_VERSION_20200609
-// #define SIM800L_IP5306_VERSION_20200811
-
 #include "utilities.h"
 
-// Select your modem:
 #define TINY_GSM_MODEM_SIM800
 #include <TinyGPS++.h>
 
@@ -66,6 +30,8 @@
 //------------------------------------------------------------------------------------
 
 #define GPS Serial2
+#define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  15        /* Time ESP32 will go to sleep (in seconds) */
 TinyGPSPlus gps;
 
 // GPS VARIABLES
@@ -73,8 +39,11 @@ TinyGPSPlus gps;
 
 double latitude = 0.00;
 double longitude = 0.00;
+int countChangesBelow15meters = 0;
 double speed = 0.00;
-const char idDevice[] = "GPS001";
+double altitude = 0.00;
+double altitudeOld = 0.00;
+const char* idGPS = "001";
 bool locationIsValid = true;
 
 // Add a reception delay - may be needed for a fast processor at a slow baud rate
@@ -93,12 +62,15 @@ const char gprsUser[] = "";
 const char gprsPass[] = "";
 
 // MQTT details
-const char *broker = "178.43.231.218";
+const char *broker = "178.43.120.9";
 
-const char *topicSpeed = "gpsDevice/GPS001/speed";
-const char *topicAltitude = "gpsDevice/GPS001/altitude";
-const char *topicLongLat = "gpsDevice/GPS001/longLat";
-const char *topicInit = "gpsDevice/GPS001/state";
+char* topicSpeed = "gpsDevice/001/speed";
+char* topicAltitude = "gpsDevice/001/altitude";
+char* topicLongLat = "gpsDevice/001/longLat";
+char* topicInit = "gpsDevice/001/state";
+
+
+
 
 
 //const char *topicGps = "test";
@@ -132,6 +104,11 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
   SerialMon.write(payload, len);
   SerialMon.println();
 
+  SerialMon.print(topicSpeed);
+  SerialMon.print(topicAltitude);
+  SerialMon.print(topicLongLat);
+  SerialMon.print(topicInit);
+
   // Only proceed if incoming message's topic matches
   if (mqtt.connected()) {
     ledStatus = !ledStatus;
@@ -141,6 +118,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
     if (gps.location.isValid()) {
       double latitude = (gps.location.lat());
       double longitude = (gps.location.lng());
+
 
       Serial.println("********** Publish MQTT data to TENTEGO");
       char mqtt_payload[50] = "";
@@ -153,7 +131,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
       Serial.println("********** End ");
       Serial.println("*****************************************************");
 
-      delay(1000);// delay
+      delay(3000);// delay
     } else {
       Serial.println(F("INVALID"));
     }
@@ -306,13 +284,73 @@ void loop()
   SerialMon.println("loop");
   checkGps();
   sendLocation();
+  sendAltitude();
+  sendSpeed();
+  delay(3000);
   mqtt.loop();
   //  SerialMon.print(topic);
 }
 
 
+void checkChangeLocationAndSleep() {
+  if (gps.location.isValid()) {
+    float newlatitude = (gps.location.lat());
+    float newlongitude = (gps.location.lng());
+    float diffCordLat = newlatitude - latitude;
+    float diffCordLon = newlongitude - longitude;
+    Serial.println(newlatitude,8);
+    Serial.println(newlongitude,8);
+
+    Serial.println(latitude,8);
+    Serial.println(longitude,8);
+
+    Serial.println(diffCordLat,8);
+    Serial.println(diffCordLon,8);
+
+
+float delLat = abs(latitude-newlatitude)*111194.9;
+float delLong = 111194.9*abs(longitude-newlongitude)*cos(radians((latitude-newlatitude)/2));
+float distance = sqrt(pow(delLat,2)+pow(delLong,2));
+Serial.println(distance,3);
+
+
+
+
+    
+    if (diffCordLat >= 0.000174 ||  diffCordLon >= 0.000174) { //0.000174 - 20m
+      countChangesBelow15meters ++;
+      Serial.println("how many is the same position");
+      Serial.println(countChangesBelow15meters);
+      if (countChangesBelow15meters >= 10) {
+        esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+        Serial.println("Start sleep...");
+        esp_deep_sleep_start();
+        countChangesBelow15meters = 0;
+      }
+    }
+
+  }
+}
+
+
+//double calculateDistance(lat1, lon1, lat2, lon2){
+//  var p = 0.017453292519943295;
+//  var a = 0.5 - cos((lat2 - lat1) * p)/2 + 
+//        cos(lat1 * p) * cos(lat2 * p) * 
+//        (1 - cos((lon2 - lon1) * p))/2;
+//  return 12742 * asin(sqrt(a));
+//}
+
+
+
+
+
+
+
 void sendLocation()
 {
+
+
   if (mqtt.connected()) {
     ledStatus = !ledStatus;
     digitalWrite(LED_GPIO, ledStatus);
@@ -322,10 +360,11 @@ void sendLocation()
       double latitude = (gps.location.lat());
       double longitude = (gps.location.lng());
 
-      Serial.println("********** Publish MQTT data to TENTEGO");
-      char mqtt_payload[50] = "";
+
+      Serial.println("********** Publish location data to Server");
+      char mqtt_payload[60] = "";
       // {\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()}}
-      snprintf (mqtt_payload, 50, "{\"latitude\":%lf,\"longitude\":%lf}", latitude, longitude);
+      snprintf(mqtt_payload, 60, "{\"latitude\":%lf,\"longitude\":%lf,\"idGPS\":\"%s\"}", latitude, longitude, idGPS);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish(topicLongLat, mqtt_payload);
@@ -333,24 +372,83 @@ void sendLocation()
       Serial.println("********** End ");
       Serial.println("*****************************************************");
 
-      delay(1000);// delay
+
     } else {
-      Serial.println(F("INVALID"));
+      Serial.println(F("NO GPS SIGNAL"));
     }
   }
 }
 
-void checkGps(){
 
-// Debug: if we haven't seen lots of data in 5 seconds, something's wrong.
-if (millis() > 5000 && gps.charsProcessed() < 10) // uh oh
+void sendSpeed()
 {
-  Serial.println("ERROR: not getting any GPS data!");
-  // dump the stream to Serial
-  Serial.println("GPS stream dump:");
-  while (true) // infinite loop
-    if (GPS.available() > 0) // any data coming in?
-      Serial.write(GPS.read());
+  if (gps.location.isValid()) {
+    double speed = (gps.speed.kmph());
+    if (speed > 0)
+    {
+      Serial.println("********** Publish speed by MQTT");
+      char mqtt_payload[50] = "";
+      snprintf (mqtt_payload, 50, "%0.2lf", speed);
+      Serial.print("Publish message: ");
+      Serial.println(mqtt_payload);
+      mqtt.publish(topicSpeed, mqtt_payload);
+      Serial.println("> MQTT data published");
+      Serial.println("********** End ");
+      Serial.println("*****************************************************");
+
+    }
+  } else {
+    Serial.println(F("NO GPS SIGNAL"));
+  }
+
+
+
 }
+
+
+void sendAltitude()
+{
+  if (gps.location.isValid()) {
+    double altitude = (gps.altitude.meters());
+    Serial.println(altitude);
+    //      if (altitude =! altitudeOld)
+    //      {
+    //       double altitudeOld = altitude;
+    Serial.println("********** Publish altitude by MQTT");
+    char mqtt_payload[50] = "";
+    snprintf (mqtt_payload, 50, "%0.2lf", altitude);
+    Serial.print("Publish message: ");
+    Serial.println(mqtt_payload);
+    mqtt.publish(topicAltitude, mqtt_payload);
+    Serial.println("> MQTT data published");
+    Serial.println("********** End ");
+    Serial.println("*****************************************************");
+
+    //     }
+
+
+
+  } else {
+    Serial.println(F("NO GPS SIGNAL"));
+    Serial.print("Satellites in view: ");
+    Serial.print(gps.satellites.value());
+  }
+
+
+
+}
+
+void checkGps() {
+  checkChangeLocationAndSleep();
+  // Debug: if we haven't seen lots of data in 5 seconds, something's wrong.
+  if (millis() > 5000 && gps.charsProcessed() < 10) // uh oh
+  {
+    Serial.println("ERROR: not getting any GPS data!");
+    // dump the stream to Serial
+    Serial.println("GPS stream dump:");
+    while (true) // infinite loop
+      if (GPS.available() > 0) // any data coming in?
+        Serial.write(GPS.read());
+  }
 
 }
