@@ -40,7 +40,7 @@ class _SettingsState extends State<Settings> {
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        color: Color(0xff000000),
+        color: Color(0xFF1E1F22),
         //image: DecorationImage(
         //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
       ),
@@ -61,28 +61,43 @@ class _SettingsState extends State<Settings> {
                     )),
               ),
             ),
-            const SelectionContainer.disabled(
-                child: Text(
-              'Wpisz numer subskrybowanego urządzenia:',
-              style: Constans.whiteTextStyle,
-            )),
-            //Row(children: [
-            TextField(
-              style: Constans.whiteTextStyle,
-              controller: getIdGpsController,
-              decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black26,
+                  width: 5.0,
                 ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-                hintText: 'Wpisz ID nowego urządzenia',
-                hintStyle: Constans.whiteHintTextStyle15px,
-                suffixIcon: IconButton(
-                  onPressed: getIdGpsController.clear,
-                  icon: Icon(Icons.clear),
-                ),
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFF3A3A3A),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+                child: Column(children: [
+                  const SelectionContainer.disabled(
+                      child: Text(
+                    'Wpisz numer subskrybowanego urządzenia:',
+                    style: Constans.whiteTextStyle,
+                  )),
+                  //Row(children: [
+                  TextField(
+                    style: Constans.whiteTextStyle,
+                    controller: getIdGpsController,
+                    decoration: InputDecoration(
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      hintText: 'Wpisz ID nowego urządzenia',
+                      hintStyle: Constans.whiteHintTextStyle15px,
+                      suffixIcon: IconButton(
+                        onPressed: getIdGpsController.clear,
+                        icon: Icon(Icons.clear),
+                      ),
+                    ),
+                  ),
+                ]),
               ),
             ),
             ElevatedButton(
@@ -97,28 +112,43 @@ class _SettingsState extends State<Settings> {
                   'Dodaj',
                   style: Constans.blackTextStyleForYellowButton,
                 )),
-            const SelectionContainer.disabled(
-                child: Text(
-              'IP MQTT:',
-              style: Constans.whiteTextStyle,
-            )),
-            //Row(children: [
-            TextField(
-              style: Constans.whiteTextStyle,
-              controller: getIpMqttBroker,
-              decoration: InputDecoration(
-                hintText: 'Wpisz IP brokera MQTT',
-                hintStyle: Constans.whiteHintTextStyle15px,
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black26,
+                  width: 5.0,
                 ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-                suffixIcon: IconButton(
-                  onPressed: getIpMqttBroker.clear,
-                  icon: const Icon(Icons.clear),
-                ),
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFF3A3A3A),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+                child: Column(children: [
+                  const SelectionContainer.disabled(
+                      child: Text(
+                    'IP MQTT:',
+                    style: Constans.whiteTextStyle,
+                  )),
+                  //Row(children: [
+                  TextField(
+                    style: Constans.whiteTextStyle,
+                    controller: getIpMqttBroker,
+                    decoration: InputDecoration(
+                      hintText: 'Wpisz IP brokera MQTT',
+                      hintStyle: Constans.whiteHintTextStyle15px,
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: getIpMqttBroker.clear,
+                        icon: const Icon(Icons.clear),
+                      ),
+                    ),
+                  ),
+                ]),
               ),
             ),
             ElevatedButton(

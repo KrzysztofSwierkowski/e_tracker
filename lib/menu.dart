@@ -36,28 +36,28 @@ class _MenuState extends State<Menu> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Color(0xff000000)),
+            icon: Icon(Icons.home, color: Color(0xffffffff)),
             label: 'Home',
-            backgroundColor: Color(0xffFFF800),
+            backgroundColor: Color(0xFF3A3A3A),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.near_me, color: Color(0xff000000)),
+            icon: Icon(Icons.near_me, color: Color(0xffffffff)),
             label: 'Client',
-            backgroundColor: Color(0xffFFF800),
+            backgroundColor: Color(0xFF3A3A3A),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.share_location, color: Color(0xff000000)),
+            icon: Icon(Icons.share_location, color: Color(0xffffffff)),
             label: 'Provider',
-            backgroundColor: Color(0xffFFF800),
+            backgroundColor: Color(0xFF3A3A3A),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings,color: Color(0xff000000),),
-            label: 'Settings',
-            backgroundColor: Color(0xffFFF800),
+            icon: Icon(Icons.settings,color: Color(0xffffffff),),
+            label: 'Ustawienia',
+            backgroundColor: Color(0xFF3A3A3A),
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xff616161),
+        selectedItemColor: Color(0xffffffff),
         onTap: _onItemTapped,
       ),
     );

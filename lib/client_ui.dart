@@ -8,7 +8,6 @@ import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
 import 'mqtt_connect.dart';
 
-
 class ClientUi extends StatefulWidget {
   const ClientUi({Key? key}) : super(key: key);
 
@@ -26,11 +25,10 @@ class _ClientUiState extends State<ClientUi>
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = Provider();
 
-
-
   //init a variable
 
   String _getMessange = '';
+
   //String _reciveTopic = '';
   List<LatLng> polylineCoordinates = [];
   LocationData? currentLocation;
@@ -40,7 +38,7 @@ class _ClientUiState extends State<ClientUi>
     setupMqttClient();
     _getNewMessange();
     getNewMarkerLocation(_getMessange);
-   // getCurrentLocation(_getMessange);
+    // getCurrentLocation(_getMessange);
     super.initState();
   }
 
@@ -79,46 +77,53 @@ class _ClientUiState extends State<ClientUi>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-   // getCurrentLocation(_getMessange);
+    // getCurrentLocation(_getMessange);
     getNewMarkerLocation(_getMessange);
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        color: Color(0xff000000),
+        color: Color(0xFF1E1F22),
         //image: DecorationImage(
         //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
-
       ),
       child: SafeArea(
         child: Column(
           children: [
             SizedBox(
               height: 500,
-              child: GoogleMap(
-                mapType: MapType.hybrid,
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(50.9227, 15.7674),
-                  zoom: 18,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.black26,
+                    width: 5.0,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                  color: const Color(0xFF3A3A3A),
                 ),
-                myLocationEnabled: true,
-                trafficEnabled: true,
-                markers: Set<Marker>.of(Constans.markers.values),
-                // markers: currentLocation == null
-                //     ? Set()
-                //     : {
-                //         Marker(
-                //             markerId: const MarkerId("1"),
-                //             position: LatLng(currentLocation!.latitude!,
-                //                 currentLocation!.longitude!)),
-                //
-                //
-                //       },
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                  setState(() {
-
-                  });
-                },
+                child: GoogleMap(
+                  mapType: MapType.hybrid,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(50.9227, 15.7674),
+                    zoom: 18,
+                  ),
+                  myLocationEnabled: true,
+                  trafficEnabled: true,
+                  markers: Set<Marker>.of(Constans.markers.values),
+                  // markers: currentLocation == null
+                  //     ? Set()
+                  //     : {
+                  //         Marker(
+                  //             markerId: const MarkerId("1"),
+                  //             position: LatLng(currentLocation!.latitude!,
+                  //                 currentLocation!.longitude!)),
+                  //
+                  //
+                  //       },
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                    setState(() {});
+                  },
+                ),
               ),
             ),
             Expanded(
@@ -139,13 +144,15 @@ class _ClientUiState extends State<ClientUi>
                       //     child:
                       //         Text("latitude : ${currentLocation?.latitude}")),
                       ElevatedButton(
-                        style: Constans.yellowButtonStyle,
+                          style: Constans.yellowButtonStyle,
                           onPressed: _cancelPositioning,
-                          child: const Text("Zakończ śledzenie", style: Constans.blackTextStyleForYellowButton)),
+                          child: const Text("Zakończ śledzenie",
+                              style: Constans.blackTextStyleForYellowButton)),
                       ElevatedButton(
                           style: Constans.yellowButtonStyle,
                           onPressed: _reconnect,
-                          child: const Text("Ponów śledzenie", style: Constans.blackTextStyleForYellowButton)),
+                          child: const Text("Ponów śledzenie",
+                              style: Constans.blackTextStyleForYellowButton)),
                       // ElevatedButton(
                       //     onPressed: () async {
                       //       await Navigator.push(
@@ -169,7 +176,7 @@ class _ClientUiState extends State<ClientUi>
   // connect to the mqttserver
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
-    for (var i=0; i < Constans.topicList.length; i++) {
+    for (var i = 0; i < Constans.topicList.length; i++) {
       mqttConnect.subscribe(Constans.topic);
       mqttConnect.subscribe(Constans.topicList[i]);
     }
@@ -185,24 +192,25 @@ class _ClientUiState extends State<ClientUi>
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
-        if (c[0].topic == Constans.topic){
-          Constans.deviceIDList.add(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
-          Constans.topicList.add(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
-          mqttConnect.subscribe(MqttPublishPayload.bytesToStringAsString(recMess.payload.message));
-        }
-        else {
+        if (c[0].topic == Constans.topic) {
+          Constans.deviceIDList.add(MqttPublishPayload.bytesToStringAsString(
+              recMess.payload.message));
+          Constans.topicList.add(MqttPublishPayload.bytesToStringAsString(
+              recMess.payload.message));
+          mqttConnect.subscribe(MqttPublishPayload.bytesToStringAsString(
+              recMess.payload.message));
+        } else {
           //_reciveTopic = c[0].topic;
           _getMessange =
               MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         }
-        });
+      });
     });
   }
 
   void _cancelPositioning() => {mqttConnect.disconnect()};
 
   void _reconnect() => {setupMqttClient(), _getNewMessange()};
-
 
   void getNewMarkerLocation(String getMessange) async {
     if (getMessange.isNotEmpty) {
@@ -229,18 +237,14 @@ class _ClientUiState extends State<ClientUi>
       // todo add Map topic and location
       //todo null exeption handling
 
-
     }
   }
 
   Future<void> _unSubscribeAllTopics() async {
-    for (var i=0; i < Constans.topicList.length; i++) {
+    for (var i = 0; i < Constans.topicList.length; i++) {
       mqttConnect.client.unsubscribe(Constans.topicList[i]);
     }
   }
-
-
-
 
   //Ends Connection
   @override
@@ -249,12 +253,6 @@ class _ClientUiState extends State<ClientUi>
     _unSubscribeAllTopics();
     super.dispose();
   }
-
-
-
-
-
-
 
   // allows it to run in the background
   @override

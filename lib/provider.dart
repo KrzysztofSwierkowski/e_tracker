@@ -20,6 +20,7 @@ class _ProviderState extends State<Provider> {
   //constructors
   MqttConnect mqttConnect = MqttConnect();
   GpsDeviceController gpsDeviceController = GpsDeviceController();
+
   //variables
   String getMessange = '';
   LocationData? currentLocation;
@@ -74,7 +75,6 @@ class _ProviderState extends State<Provider> {
 
   @override
   void initState() {
-
     setupMqttClient();
     getCurrentLocation();
     super.initState();
@@ -85,7 +85,7 @@ class _ProviderState extends State<Provider> {
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
-        color: Color(0xff000000),
+        color: Color(0xFF1E1F22),
         //image: DecorationImage(
         //  image: AssetImage("assets/HomeBackground.png"), fit: BoxFit.cover),
       ),
@@ -95,64 +95,84 @@ class _ProviderState extends State<Provider> {
             color: Color(0xffFFF800),
             height: 20,
           ),
-          Container(
-            child: currentLocation == null
-                ? const CircularProgressIndicator()
-                : Column(children: [
-                    const Center(
-                        child: Text(
-                      "Dane GPS:",
-                      style: Constans.whiteTextStyle,
-                    )),
-                    Center(
-                        child: Text(
-                      "longitude :${currentLocation?.longitude}",
-                      style: Constans.whiteTextStyle,
-                    )),
-
-                    Center(
-                        child: Text(
-                      "latitude : ${currentLocation?.latitude}",
-                      style: Constans.whiteTextStyle,
-                    )),
-              Center(
-                  child: Text(
-                    "Prędkość : ${(currentLocation!.speed! * 3.6).toStringAsFixed(1)} Km/h",
-                    style: Constans.whiteTextStyle,
-                  )),
-              Center(
-                  child: Text(
-                    "Wysokość : ${(currentLocation!.altitude! * 3.6).toStringAsFixed(1)} mnpm",
-                    style: Constans.whiteTextStyle,
-                  )),
-              Center(
-                  child: Text(
-                    "dokładność : ${(currentLocation!.accuracy! * 3.6).toStringAsFixed(1)} m",
-                    style: Constans.whiteTextStyle,
-                  ))
-                  ]),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black26,
+                  width: 5.0,
+                ),
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFF3A3A3A),
+              ),
+              child: currentLocation == null
+                  ? const CircularProgressIndicator()
+                  : Column(children: [
+                      const Center(
+                          child: Text(
+                        "Dane GPS:",
+                        style: Constans.whiteTextStyle,
+                      )),
+                      Center(
+                          child: Text(
+                        "longitude :${currentLocation?.longitude}",
+                        style: Constans.whiteTextStyle,
+                      )),
+                      Center(
+                          child: Text(
+                        "latitude : ${currentLocation?.latitude}",
+                        style: Constans.whiteTextStyle,
+                      )),
+                      Center(
+                          child: Text(
+                        "Prędkość : ${(currentLocation!.speed! * 3.6).toStringAsFixed(1)} Km/h",
+                        style: Constans.whiteTextStyle,
+                      )),
+                      Center(
+                          child: Text(
+                        "Wysokość : ${(currentLocation!.altitude! * 3.6).toStringAsFixed(1)} mnpm",
+                        style: Constans.whiteTextStyle,
+                      )),
+                      Center(
+                          child: Text(
+                        "dokładność : ${(currentLocation!.accuracy! * 3.6).toStringAsFixed(1)} m",
+                        style: Constans.whiteTextStyle,
+                      ))
+                    ]),
+            ),
           ),
           const Divider(
             color: Color(0xffFFF800),
             height: 40,
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 25),
-            child: TextField(
-              style: Constans.whiteTextStyle,
-              controller: getDeviceNameController,
-              decoration: InputDecoration(
-                hintText: 'Wpisz nazwę swojego urządzenia',
-                hintStyle: Constans.whiteHintTextStyle15px,
-                suffixIcon: IconButton(
-                  onPressed: getDeviceNameController.clear,
-                  icon: const Icon(Icons.clear),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black26,
+                width: 5.0,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFF3A3A3A),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+              child: TextField(
+                style: Constans.whiteTextStyle,
+                controller: getDeviceNameController,
+                decoration: InputDecoration(
+                  hintText: 'Wpisz nazwę swojego urządzenia',
+                  hintStyle: Constans.whiteHintTextStyle15px,
+                  suffixIcon: IconButton(
+                    onPressed: getDeviceNameController.clear,
+                    icon: const Icon(Icons.clear),
+                  ),
                 ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 25),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
             child: ElevatedButton(
                 style: Constans.yellowButtonStyle,
                 child: const Text(
@@ -166,9 +186,7 @@ class _ProviderState extends State<Provider> {
                   _sendDeviceNameMessage();
                   _addDeviceToTopicAndDevicesLists();
                   getDeviceNameController.clear;
-                  setState(() {
-
-                  });
+                  setState(() {});
                 }),
           ),
           Padding(
@@ -181,13 +199,35 @@ class _ProviderState extends State<Provider> {
                 ),
                 onPressed: () {
                   sendLocalizationMessage();
-                  setState(() {
-
-                  });
+                  setState(() {});
                 }),
           ),
-          const Text("Obecna nazwa urządzenia to:",style: whiteTextStyle,),
-          Text(Constans.topicCurrentDeviceName, style: whiteTextStyle,)
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black26,
+                width: 5.0,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFF3A3A3A),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+              child: Column(children: [
+                const Text(
+                  "Obecna nazwa urządzenia to:",
+                  style: whiteTextStyle,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text(
+                    Constans.topicCurrentDeviceName,
+                    style: whiteTextStyle,
+                  ),
+                ),
+              ]),
+            ),
+          ),
         ]),
       ),
     );
@@ -199,7 +239,8 @@ class _ProviderState extends State<Provider> {
         Constans.topicCurrentDeviceName != null) {
       mqttConnect.publishMessage(Constans.topicCurrentDeviceName,
           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
-      mqttConnect.publishMessage("gpsDevice/${Constans.topicCurrentDeviceName}/longLat",
+      mqttConnect.publishMessage(
+          "gpsDevice/${Constans.topicCurrentDeviceName}/longLat",
           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
     } else {
       setupMqttClient();
@@ -224,7 +265,8 @@ class _ProviderState extends State<Provider> {
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
     mqttConnect.subscribe(Constans.topic);
-    mqttConnect.subscribe("gpsDevice/${Constans.topicCurrentDeviceName}/longLat");
+    mqttConnect
+        .subscribe("gpsDevice/${Constans.topicCurrentDeviceName}/longLat");
   }
 
   void getNewMessange() {

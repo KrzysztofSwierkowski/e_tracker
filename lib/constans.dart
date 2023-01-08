@@ -24,12 +24,12 @@ String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 //Styles:
 
 final ButtonStyle yellowButtonStyle =
-    ElevatedButton.styleFrom(backgroundColor: const Color(0xffFFF800));
+    ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3A3A3A));
 
 const TextStyle blackTextStyleForYellowButton =
-    TextStyle(color: Color(0xff000000));
+    TextStyle(color: Color(0xffffffff));
 const TextStyle whiteTextStyle =
-TextStyle(color: Color(0xffFFFFFF));
+TextStyle(color: Color(0xffffffff));
 
 const TextStyle whiteHintTextStyle15px =
-TextStyle(fontSize: 15.0, color: Color(0xffFFFFFF));
+TextStyle(fontSize: 15.0, color: Color(0xffffffff));
