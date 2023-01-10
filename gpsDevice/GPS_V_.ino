@@ -31,7 +31,7 @@
 
 #define GPS Serial2
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  15        /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP  60        /* Time ESP32 will go to sleep (in seconds) */
 TinyGPSPlus gps;
 
 // GPS VARIABLES
@@ -39,7 +39,8 @@ TinyGPSPlus gps;
 
 double latitude = 0.00;
 double longitude = 0.00;
-int countChangesBelow15meters = 0;
+int countChangesBelowInMeters = 0;
+int changesMoreThanSleepLimit = 0;
 double speed = 0.00;
 double altitude = 0.00;
 double altitudeOld = 0.00;
@@ -62,7 +63,7 @@ const char gprsUser[] = "";
 const char gprsPass[] = "";
 
 // MQTT details
-const char *broker = "178.43.120.9";
+const char *broker = "178.43.131.43";
 
 char* topicSpeed = "gpsDevice/001/speed";
 char* topicAltitude = "gpsDevice/001/altitude";
@@ -298,54 +299,47 @@ void checkChangeLocationAndSleep() {
     float newlongitude = (gps.location.lng());
     float diffCordLat = newlatitude - latitude;
     float diffCordLon = newlongitude - longitude;
-    Serial.println(newlatitude,8);
-    Serial.println(newlongitude,8);
+    Serial.println(newlatitude, 8);
+    Serial.println(newlongitude, 8);
 
-    Serial.println(latitude,8);
-    Serial.println(longitude,8);
+    Serial.println(latitude, 8);
+    Serial.println(longitude, 8);
 
-    Serial.println(diffCordLat,8);
-    Serial.println(diffCordLon,8);
-
-
-float delLat = abs(latitude-newlatitude)*111194.9;
-float delLong = 111194.9*abs(longitude-newlongitude)*cos(radians((latitude-newlatitude)/2));
-float distance = sqrt(pow(delLat,2)+pow(delLong,2));
-Serial.println(distance,3);
+    Serial.println(diffCordLat, 8);
+    Serial.println(diffCordLon, 8);
 
 
+    float delLat = abs(latitude - newlatitude) * 6371;
+    float delLong = 6371 * abs(longitude - newlongitude) * cos(radians((latitude - newlatitude) / 2));
+    float distance = (sqrt(pow(delLat, 2) + pow(delLong, 2))) * 1000; //distance in meters
+    Serial.println(distance, 3);
 
+    //Sleep flag reset :
+    if (distance >= 10) {
+      changesMoreThanSleepLimit ++;
+       Serial.println(changesMoreThanSleepLimit);
+      if (changesMoreThanSleepLimit >= 3) {
+        countChangesBelowInMeters = 0;
+        changesMoreThanSleepLimit = 0;
+      }
+    }
 
-    
-    if (diffCordLat >= 0.000174 ||  diffCordLon >= 0.000174) { //0.000174 - 20m
-      countChangesBelow15meters ++;
+    if (distance <= 10) {
+      countChangesBelowInMeters ++;
       Serial.println("how many is the same position");
-      Serial.println(countChangesBelow15meters);
-      if (countChangesBelow15meters >= 10) {
+      Serial.println(countChangesBelowInMeters);
+      if (countChangesBelowInMeters >= 10) {
         esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
         Serial.println("Start sleep...");
+        // Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
+            gpio_hold_en(GPIO_NUM_25);  //MODEM_POWER_ON
         esp_deep_sleep_start();
-        countChangesBelow15meters = 0;
+        countChangesBelowInMeters = 0;
       }
     }
 
   }
 }
-
-
-//double calculateDistance(lat1, lon1, lat2, lon2){
-//  var p = 0.017453292519943295;
-//  var a = 0.5 - cos((lat2 - lat1) * p)/2 + 
-//        cos(lat1 * p) * cos(lat2 * p) * 
-//        (1 - cos((lon2 - lon1) * p))/2;
-//  return 12742 * asin(sqrt(a));
-//}
-
-
-
-
-
-
 
 void sendLocation()
 {
