@@ -6,6 +6,8 @@ import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
+import 'constans.dart';
+import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
 
 class ClientUi extends StatefulWidget {
@@ -24,6 +26,7 @@ class _ClientUiState extends State<ClientUi>
   //create a new instance of the used class
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = Provider();
+  GpsDevicesList gpsDevicesList = GpsDevicesList();
 
   //init a variable
 
@@ -102,23 +105,14 @@ class _ClientUiState extends State<ClientUi>
                 ),
                 child: GoogleMap(
                   mapType: MapType.hybrid,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(50.9227, 15.7674),
+                  initialCameraPosition: const CameraPosition(
+                    target: LatLng(50.328724908216365, 18.607050171081905),
                     zoom: 18,
                   ),
                   myLocationEnabled: true,
                   trafficEnabled: true,
                   markers: Set<Marker>.of(Constans.markers.values),
-                  // markers: currentLocation == null
-                  //     ? Set()
-                  //     : {
-                  //         Marker(
-                  //             markerId: const MarkerId("1"),
-                  //             position: LatLng(currentLocation!.latitude!,
-                  //                 currentLocation!.longitude!)),
-                  //
-                  //
-                  //       },
+
                   onMapCreated: (GoogleMapController controller) {
                     _controller.complete(controller);
                     setState(() {});
@@ -132,10 +126,10 @@ class _ClientUiState extends State<ClientUi>
                   child: Padding(
                     padding: const EdgeInsets.only(top: 5, bottom: 25),
                     child:
-                        // currentLocation == null
-                        //     ? const CircularProgressIndicator()
-                        //     :
-                        Column(children: [
+                    // currentLocation == null
+                    //     ? const CircularProgressIndicator()
+                    //     :
+                    Column(children: [
                       // const Center(child: Text("Dane GPS obiektu:")),
                       // Center(
                       //     child:
@@ -153,14 +147,24 @@ class _ClientUiState extends State<ClientUi>
                           onPressed: _reconnect,
                           child: const Text("Ponów śledzenie",
                               style: Constans.blackTextStyleForYellowButton)),
-                      // ElevatedButton(
-                      //     onPressed: () async {
-                      //       await Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(builder: (context) => const GpsDevicesList()),
-                      //       );
-                      //     },
-                      //     child: const Text('Pokaż liste urządzeń')),
+
+                      ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: Constans.deviceIDList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ElevatedButton(
+                              style: Constans.yellowButtonStyle,
+                              child: Text(
+                                  "Pokaż urządzenie na mapie: ${Constans.deviceIDList[index]}"),
+                              onPressed: () {
+                                MarkerId;
+                                _animateMapCameraToMarker(MarkerId(Constans.deviceIDList[index]));
+                                setState(() {});
+                                print(Constans.deviceIDList[index]);
+                              },
+                            );
+                          }),
                     ]),
                   ),
                 ),
@@ -189,7 +193,7 @@ class _ClientUiState extends State<ClientUi>
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       late final pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
         if (c[0].topic == Constans.topic) {
@@ -244,6 +248,13 @@ class _ClientUiState extends State<ClientUi>
     for (var i = 0; i < Constans.topicList.length; i++) {
       mqttConnect.client.unsubscribe(Constans.topicList[i]);
     }
+  }
+
+  Future<void> _animateMapCameraToMarker(MarkerId markerId) async {
+    final Marker marker = markers[markerId]!;
+    final LatLng currentPosition = marker.position;
+    GoogleMapController googleMapController = await _controller.future;
+    googleMapController.animateCamera(CameraUpdate.newLatLng(currentPosition));
   }
 
   //Ends Connection

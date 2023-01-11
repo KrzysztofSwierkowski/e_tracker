@@ -282,11 +282,11 @@ class _ProviderState extends State<Provider> {
     });
   }
 
-  @override
-  void dispose() {
-    mqttConnect.disconnect();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   mqttConnect.disconnect();
+  //   super.dispose();
+  // }
 }
 
 //todo repair add another device

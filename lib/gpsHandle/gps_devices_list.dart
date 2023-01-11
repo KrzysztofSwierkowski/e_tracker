@@ -84,7 +84,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
                               OutlinedButton(
                                   child: Text('Dodaj do mapy'),
                                   onPressed: () {
-                                    _add(index, items[index]);
+                                    add(index, items[index]);
                                     setState(() {});
                                   }),
                               OutlinedButton(
@@ -115,11 +115,11 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
   void _addPhone() {
     if (!Constans.deviceIDList.contains(Constans.topic)) {
-      _add(items.length, Constans.topic);
+      add(items.length, Constans.topic);
     }
   }
 
-  void _add(int markerIdCounter, String idMarkerValue) {
+  void add(int markerIdCounter, String idMarkerValue) {
     final int markerCount = items.length;
 
     if (markerCount == 30) {
@@ -128,6 +128,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
     final String markerIdVal = idMarkerValue;
     markerIdCounter++;
+    Constans.MarkersOnMap.add(markerIdVal);
     final MarkerId markerId = MarkerId(markerIdVal);
 
     String topicLongLat =

@@ -15,9 +15,10 @@ String topicCurrentDeviceName = "Android";
 
 //Lists
 
-String ipBroker = "178.43.120.9"; //broker ip address
+String ipBroker = "178.43.131.43"; //broker ip address
 List<String> deviceIDList = [];
 List<String> topicList = [];
+List<String> MarkersOnMap = [];
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 
