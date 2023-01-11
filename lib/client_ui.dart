@@ -158,7 +158,7 @@ class _ClientUiState extends State<ClientUi>
                               child: Text(
                                   "Pokaż urządzenie na mapie: ${Constans.deviceIDList[index]}"),
                               onPressed: () {
-                                MarkerId;
+                                //MarkerId;
                                 _animateMapCameraToMarker(MarkerId(Constans.deviceIDList[index]));
                                 setState(() {});
                                 print(Constans.deviceIDList[index]);

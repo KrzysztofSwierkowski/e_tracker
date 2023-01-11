@@ -15,7 +15,7 @@ String topicCurrentDeviceName = "Android";
 
 //Lists
 
-String ipBroker = "178.43.131.43"; //broker ip address
+String ipBroker = "rsttpl.ddns.net"; //broker ip address
 List<String> deviceIDList = [];
 List<String> topicList = [];
 List<String> MarkersOnMap = [];
