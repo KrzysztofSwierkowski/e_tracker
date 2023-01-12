@@ -28,6 +28,7 @@ class _ClientUiState extends State<ClientUi>
   Provider provider = Provider();
   GpsDevicesList gpsDevicesList = GpsDevicesList();
 
+
   //init a variable
 
   String _getMessange = '';
@@ -157,7 +158,7 @@ class _ClientUiState extends State<ClientUi>
                               child: Text(
                                   "Pokaż urządzenie na mapie: ${Constans.deviceIDList[index]}"),
                               onPressed: () {
-                                //MarkerId;
+
                                 _animateMapCameraToMarker(MarkerId(Constans.deviceIDList[index]));
                                 setState(() {});
                                 print(Constans.deviceIDList[index]);

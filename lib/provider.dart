@@ -177,15 +177,15 @@ class _ProviderState extends State<Provider> {
             child: ElevatedButton(
                 style: Constans.yellowButtonStyle,
                 child: const Text(
-                  'Udostępnij lokalizację',
+                  'Wyślij nazwę na inne urządzenia',
                   style: Constans.blackTextStyleForYellowButton,
                 ),
                 onPressed: () {
                   Constans.topicCurrentDeviceName =
                       getDeviceNameController.text;
-                  gpsDeviceController.saveCurrentDeviceNameKey();
+                  //gpsDeviceController.saveCurrentDeviceNameKey();
                   _sendDeviceNameMessage();
-                  _addDeviceToTopicAndDevicesLists();
+                  //_addDeviceToTopicAndDevicesLists();
                   getDeviceNameController.clear;
                   setState(() {});
                 }),
