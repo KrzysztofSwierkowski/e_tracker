@@ -31,7 +31,16 @@ class _MenuState extends State<Menu> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: IndexedStack(
+          children: const <Widget>[
+            HomePage(),
+            ClientUi(),
+            Provider(),
+            Settings(),
+          ],
+          index: _selectedIndex,
+        ),
+        //_widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -51,7 +60,10 @@ class _MenuState extends State<Menu> {
             backgroundColor: Color(0xFF3A3A3A),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings,color: Color(0xffffffff),),
+            icon: Icon(
+              Icons.settings,
+              color: Color(0xffffffff),
+            ),
             label: 'Ustawienia',
             backgroundColor: Color(0xFF3A3A3A),
           ),
