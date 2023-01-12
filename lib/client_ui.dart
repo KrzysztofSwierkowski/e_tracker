@@ -80,7 +80,6 @@ class _ClientUiState extends State<ClientUi>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // getCurrentLocation(_getMessange);
     getNewMarkerLocation(_getMessange);
     return Container(
       constraints: const BoxConstraints.expand(),
@@ -262,7 +261,7 @@ class _ClientUiState extends State<ClientUi>
   void dispose() {
     mqttConnect.disconnect();
     _unSubscribeAllTopics();
-    super.dispose();
+   // super.dispose();
   }
 
   // allows it to run in the background

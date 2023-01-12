@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "978490303721",
+    "firebase_url": "https://mqttphone-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "mqttphone",
     "storage_bucket": "mqttphone.appspot.com"
   },
