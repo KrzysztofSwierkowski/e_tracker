@@ -10,14 +10,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   GpsDeviceController gpsDeviceController = GpsDeviceController();
   MqttConnect mqttConnect = MqttConnect();
+
+
 
   @override
   void initState() {
     gpsDeviceController.getDeviceIDList();
     gpsDeviceController.getCurrentDeviceNameKey();
     setupMqttClient();
+    mqttConnect.client.connectionStatus!.state.name;
     super.initState();
   }
 
@@ -92,6 +96,7 @@ class _HomePageState extends State<HomePage> {
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                           color: Color(0xffffffff),
+                          fontSize: 20
                         )),
 
                       Container(
