@@ -229,7 +229,7 @@ class _ClientUiState extends State<ClientUi>
                                         width:
                                             MediaQuery.of(context).size.width *
                                                 0.85,
-                                        height: 60,
+                                        //height: 60,
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                             color: Colors.black26,
@@ -263,7 +263,7 @@ class _ClientUiState extends State<ClientUi>
                                     Container(
                                       width: MediaQuery.of(context).size.width *
                                           0.15,
-                                      height: 60,
+                                      //height: 60,
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: Colors.black26,
