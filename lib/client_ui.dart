@@ -28,7 +28,6 @@ class _ClientUiState extends State<ClientUi>
   Provider provider = Provider();
   GpsDevicesList gpsDevicesList = GpsDevicesList();
 
-
   //init a variable
 
   String _getMessange = '';
@@ -112,7 +111,6 @@ class _ClientUiState extends State<ClientUi>
                   myLocationEnabled: true,
                   trafficEnabled: true,
                   markers: Set<Marker>.of(Constans.markers.values),
-
                   onMapCreated: (GoogleMapController controller) {
                     _controller.complete(controller);
                     setState(() {});
@@ -126,10 +124,10 @@ class _ClientUiState extends State<ClientUi>
                   child: Padding(
                     padding: const EdgeInsets.only(top: 5, bottom: 25),
                     child:
-                    // currentLocation == null
-                    //     ? const CircularProgressIndicator()
-                    //     :
-                    Column(children: [
+                        // currentLocation == null
+                        //     ? const CircularProgressIndicator()
+                        //     :
+                        Column(children: [
                       // const Center(child: Text("Dane GPS obiektu:")),
                       // Center(
                       //     child:
@@ -137,33 +135,168 @@ class _ClientUiState extends State<ClientUi>
                       // Center(
                       //     child:
                       //         Text("latitude : ${currentLocation?.latitude}")),
-                      ElevatedButton(
-                          style: Constans.yellowButtonStyle,
-                          onPressed: _cancelPositioning,
-                          child: const Text("Zakończ śledzenie",
-                              style: Constans.blackTextStyleForYellowButton)),
-                      ElevatedButton(
-                          style: Constans.yellowButtonStyle,
-                          onPressed: _reconnect,
-                          child: const Text("Ponów śledzenie",
-                              style: Constans.blackTextStyleForYellowButton)),
-
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black26,
+                                width: 5.0,
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              color: const Color(0xFF3A3A3A),
+                            ),
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    padding: EdgeInsets.all(0),
+                                    icon: Icon(Icons.share_location_outlined,
+                                        color: Colors.green, size: 42),
+                                    onPressed: _reconnect,
+                                  ),
+                                  Text("Ponów śledzenie",
+                                      style: whiteHintTextStyle15px),
+                                ]),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black26,
+                                width: 5.0,
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              color: const Color(0xFF3A3A3A),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  padding: EdgeInsets.all(0),
+                                  icon: Icon(Icons.gps_off_outlined,
+                                      color: Colors.red, size: 42),
+                                  onPressed: _cancelPositioning,
+                                ),
+                                Text("Zakończ śledzenie",
+                                    textAlign: TextAlign.justify,
+                                    style: whiteHintTextStyle15px),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(0, 15, 0, 5),
+                        child: Text(
+                          "Lista urządzeń:",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: Color(0xffffffff),
+                            shadows: <Shadow>[
+                              Shadow(
+                                //offset: Offset(3.0, 10.0),
+                                blurRadius: 15.0,
+                                color: Color.fromARGB(255, 255, 248, 0),
+                              ),
+                              Shadow(
+                                // offset: Offset(3.0, 10.0),
+                                blurRadius: 8.0,
+                                color: Color.fromARGB(125, 255, 248, 0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       ListView.builder(
                           scrollDirection: Axis.vertical,
                           shrinkWrap: true,
                           itemCount: Constans.deviceIDList.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return ElevatedButton(
-                              style: Constans.yellowButtonStyle,
-                              child: Text(
-                                  "Pokaż urządzenie na mapie: ${Constans.deviceIDList[index]}"),
-                              onPressed: () {
-
-                                _animateMapCameraToMarker(MarkerId(Constans.deviceIDList[index]));
-                                setState(() {});
-                                print(Constans.deviceIDList[index]);
-                              },
-                            );
+                            return Column(children: [
+                              Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.85,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.black26,
+                                            width: 5.0,
+                                          ),
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(25),
+                                              bottomLeft: Radius.circular(25)),
+                                          color: const Color(0xFF3A3A3A),
+                                        ),
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              TextButton(
+                                                child: Text(
+                                                  "ID : \"${Constans.deviceIDList[index]}\", DANE : TAK , OBDII : TAK , Ruch : TAK  ",
+                                                  style: whiteHintTextStyle15px,
+                                                ),
+                                                onPressed: () {
+                                                  _animateMapCameraToMarker(
+                                                      MarkerId(
+                                                          Constans.deviceIDList[
+                                                              index]));
+                                                  setState(() {});
+                                                  print(Constans
+                                                      .deviceIDList[index]);
+                                                },
+                                              ),
+                                            ])),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.15,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.black26,
+                                          width: 5.0,
+                                        ),
+                                        borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(25),
+                                            bottomRight: Radius.circular(25)),
+                                        color: const Color(0xFF3A3A3A),
+                                      ),
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.place,
+                                                  color: Colors.red, size: 35),
+                                              tooltip: 'Pokaż na mapie',
+                                              onPressed: () {
+                                                setState(() {
+                                                  _animateMapCameraToMarker(
+                                                      MarkerId(
+                                                          Constans.deviceIDList[
+                                                              index]));
+                                                  print(Constans
+                                                      .deviceIDList[index]);
+                                                });
+                                              },
+                                            ),
+                                          ]),
+                                    ),
+                                  ]),
+                            ]);
                           }),
                     ]),
                   ),
@@ -193,7 +326,7 @@ class _ClientUiState extends State<ClientUi>
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       late final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       print('MQTTClient::Message received on topic: <${c[0].topic}> is $pt\n');
       setState(() {
         if (c[0].topic == Constans.topic) {
@@ -262,7 +395,7 @@ class _ClientUiState extends State<ClientUi>
   void dispose() {
     mqttConnect.disconnect();
     _unSubscribeAllTopics();
-   // super.dispose();
+    // super.dispose();
   }
 
   // allows it to run in the background

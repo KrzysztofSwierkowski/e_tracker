@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'mqtt_connect.dart';
 import 'gpsHandle/gps_device_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,11 +11,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GpsDeviceController gpsDeviceController = GpsDeviceController();
+  MqttConnect mqttConnect = MqttConnect();
 
   @override
   void initState() {
     gpsDeviceController.getDeviceIDList();
     gpsDeviceController.getCurrentDeviceNameKey();
+    setupMqttClient();
     super.initState();
   }
 
@@ -33,8 +35,9 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 25, 0, 25),
+                padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
                 child: Container(
+                  width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.black26,
@@ -46,7 +49,8 @@ class _HomePageState extends State<HomePage> {
                   child: const Padding(
                     padding: EdgeInsets.fromLTRB(10, 25, 10, 25),
                     child: Text(
-                      "LOKALIZACJA URZĄDZENIA",
+                      "E-Tracker",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
@@ -70,6 +74,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Container(
+                width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: Colors.black26,
@@ -78,23 +83,49 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(25),
                   color: const Color(0xFF3A3A3A),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 25, 0, 25),
-                  child: Text(
-                      "Aplikacja przy pomocy której można lokalizować urządzenia GPS przy pomocy map google.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xffffffff),
-                      )),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                    Text("Połączenie z serwerem MQTT",
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(
+                          color: Color(0xffffffff),
+                        )),
+
+                      Container(
+                        child: mqttConnect.client.connectionStatus!.state.name ==
+                                "connected"
+                            ? //check if loading is true or false
+                            const Icon(
+                                Icons.sensors_outlined,
+                                color: Colors.green,
+                                size: 30.0,
+                                semanticLabel: 'Połączono z MQTT',
+                              )
+                            : //show progress on loading = true
+                            const Icon(
+                                Icons.sensors_off_outlined,
+                                color: Colors.red,
+                                size: 30.0,
+                                semanticLabel: 'Brak połączenia z MQTT',
+                              ), //show this text on loading = false
+                      ),
+
+                  ]),
                 ),
               ),
-              Container(
-                alignment: Alignment.center,
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(45.0),
-                  child: const Image(
-                    image: AssetImage('assets/icon.png'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
+                child: Container(
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(45.0),
+                    child: const Image(
+                      image: AssetImage('assets/icon.png'),
+                    ),
                   ),
                 ),
               ),
@@ -104,5 +135,19 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future<void> setupMqttClient() async {
+    await mqttConnect.connect();
+    setState(() {
+
+    });
+  }
+
+  @override
+  void dispose() {
+    mqttConnect.disconnect();
+    super.dispose();
+  }
+
 }
 //todo create userfriendly UI

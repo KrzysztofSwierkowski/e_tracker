@@ -173,6 +173,18 @@ class _SettingsState extends State<Settings> {
                     style: Constans.blackTextStyleForYellowButton,
                   )),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
+              child: ElevatedButton(
+                  style: Constans.yellowButtonStyle,
+                  onPressed: () async {
+                    //todo connection ELM stettings via BT, send to ESP by Mqtt.
+                  },
+                  child: const Text(
+                    'OBD ELM327 BLUETOOTH',
+                    style: Constans.blackTextStyleForYellowButton,
+                  )),
+            ),
             //]),
           ]),
         ),

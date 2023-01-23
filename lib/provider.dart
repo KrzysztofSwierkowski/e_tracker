@@ -147,6 +147,9 @@ class _ProviderState extends State<Provider> {
             color: Color(0xffFFF800),
             height: 40,
           ),
+      Padding(
+          padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+          child:
           Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -157,12 +160,12 @@ class _ProviderState extends State<Provider> {
               color: const Color(0xFF3A3A3A),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+              padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
               child: TextField(
                 style: Constans.whiteTextStyle,
                 controller: getDeviceNameController,
                 decoration: InputDecoration(
-                  hintText: 'Wpisz nazwę swojego urządzenia',
+                  hintText: 'Wpisz nową nazwę swojego urządzenia',
                   hintStyle: Constans.whiteHintTextStyle15px,
                   suffixIcon: IconButton(
                     onPressed: getDeviceNameController.clear,
@@ -170,6 +173,33 @@ class _ProviderState extends State<Provider> {
                   ),
                 ),
               ),
+            ),
+          ),
+      ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black26,
+                width: 5.0,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFF3A3A3A),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+              child: Column(children: [
+                const Text(
+                  "Obecna nazwa urządzenia to:",
+                  style: whiteTextStyle,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text(
+                    Constans.topicCurrentDeviceName,
+                    style: whiteTextStyle,
+                  ),
+                ),
+              ]),
             ),
           ),
           Padding(
@@ -203,32 +233,7 @@ class _ProviderState extends State<Provider> {
                   setState(() {});
                 }),
           ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black26,
-                width: 5.0,
-              ),
-              borderRadius: BorderRadius.circular(25),
-              color: const Color(0xFF3A3A3A),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
-              child: Column(children: [
-                const Text(
-                  "Obecna nazwa urządzenia to:",
-                  style: whiteTextStyle,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Text(
-                    Constans.topicCurrentDeviceName,
-                    style: whiteTextStyle,
-                  ),
-                ),
-              ]),
-            ),
-          ),
+
         ]),
       ),
     );
