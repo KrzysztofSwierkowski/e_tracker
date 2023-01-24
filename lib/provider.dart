@@ -82,7 +82,6 @@ class _ProviderState extends State<Provider> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
@@ -147,35 +146,34 @@ class _ProviderState extends State<Provider> {
             color: Color(0xffFFF800),
             height: 40,
           ),
-      Padding(
-          padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
-          child:
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black26,
-                width: 5.0,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black26,
+                  width: 5.0,
+                ),
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFF3A3A3A),
               ),
-              borderRadius: BorderRadius.circular(25),
-              color: const Color(0xFF3A3A3A),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
-              child: TextField(
-                style: Constans.whiteTextStyle,
-                controller: getDeviceNameController,
-                decoration: InputDecoration(
-                  hintText: 'Wpisz nową nazwę swojego urządzenia',
-                  hintStyle: Constans.whiteHintTextStyle15px,
-                  suffixIcon: IconButton(
-                    onPressed: getDeviceNameController.clear,
-                    icon: const Icon(Icons.clear),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(5, 5, 5, 15),
+                child: TextField(
+                  style: Constans.whiteTextStyle,
+                  controller: getDeviceNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Wpisz nową nazwę swojego urządzenia',
+                    hintStyle: Constans.whiteHintTextStyle15px,
+                    suffixIcon: IconButton(
+                      onPressed: getDeviceNameController.clear,
+                      icon: const Icon(Icons.clear),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-      ),
           Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -233,7 +231,6 @@ class _ProviderState extends State<Provider> {
                   setState(() {});
                 }),
           ),
-
         ]),
       ),
     );
@@ -244,10 +241,10 @@ class _ProviderState extends State<Provider> {
             MqttConnectionState.connected &&
         Constans.topicCurrentDeviceName != null) {
       mqttConnect.publishMessage(Constans.topicCurrentDeviceName,
-          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
+          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${Constans.topicCurrentDeviceName}\"}');
       mqttConnect.publishMessage(
           "gpsDevice/${Constans.topicCurrentDeviceName}/longLat",
-          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${getDeviceNameController.text}\"}');
+          '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},"idGPS": \"${Constans.topicCurrentDeviceName}\"}');
     } else {
       setupMqttClient();
     }
@@ -267,6 +264,7 @@ class _ProviderState extends State<Provider> {
     Constans.topicList.add(Constans.topicCurrentDeviceName);
     Constans.deviceIDList.add(Constans.topicCurrentDeviceName);
   }
+
 
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
@@ -288,11 +286,11 @@ class _ProviderState extends State<Provider> {
     });
   }
 
-  // @override
-  // void dispose() {
-  //   mqttConnect.disconnect();
-  //   super.dispose();
-  // }
+// @override
+// void dispose() {
+//   mqttConnect.disconnect();
+//   super.dispose();
+// }
 }
 
 //todo repair add another device
