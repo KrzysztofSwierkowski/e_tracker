@@ -1,14 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+import 'package:phone_mqtt/provider.dart';
+
 import '../constans.dart';
 import '../mqtt_connect.dart';
 import 'gps_device_controller.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:location/location.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:phone_mqtt/provider.dart';
 
 class GpsDevicesList extends StatefulWidget {
   const GpsDevicesList({super.key});
@@ -44,64 +46,67 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     getNewMarkerLocation(_getMessange);
     return Material(
       child: SafeArea(
-        child: Column(
-          children: [
-            const Padding(padding: EdgeInsets.fromLTRB(0, 35, 0, 0)),
-            const Text("Lista zapisanych Id urządzeń:"),
-            const Text("Przesuń w lewo by usunąć"),
-            const Padding(padding: EdgeInsets.fromLTRB(0, 35, 0, 0)),
-            Container(
-              child: items.isNotEmpty
-                  ? ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Dismissible(
-                          onDismissed: (DismissDirection direction) {
-                            gpsDeviceController.saveDeviceIDList();
-                            setState(() {
-                              _remove(items[index]);
-                              items.removeAt(index);
-                            });
-                          },
-                          secondaryBackground: Container(
-                            color: Colors.red,
-                            child: const Center(
-                              child: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.white),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Padding(padding: EdgeInsets.fromLTRB(0, 35, 0, 0)),
+              const Text("Lista zapisanych Id urządzeń:"),
+              const Text("Przesuń w lewo by usunąć"),
+              const Padding(padding: EdgeInsets.fromLTRB(0, 35, 0, 0)),
+              Container(
+                child: items.isNotEmpty
+                    ? ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: items.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Dismissible(
+                            onDismissed: (DismissDirection direction) {
+                              gpsDeviceController.saveDeviceIDList();
+                              setState(() {
+                                _remove(items[index]);
+                                items.removeAt(index);
+                              });
+                            },
+                            secondaryBackground: Container(
+                              color: Colors.red,
+                              child: const Center(
+                                child: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ),
-                          ),
-                          background: Container(),
-                          key: UniqueKey(),
-                          direction: DismissDirection.endToStart,
-                          child: ListTile(
-                            leading: const Icon(Icons.list),
-                            title: Text(items[index]),
-                            subtitle: Row(children: <Widget>[
-                              OutlinedButton(
-                                  child: Text('Dodaj do mapy'),
-                                  onPressed: () {
-                                    addMarkerToMap(index, items[index]);
-                                    setState(() {});
-                                  }),
-                              OutlinedButton(
-                                  child: Text('Usuń z bazy'),
-                                  onPressed: () {
-                                    setState(() {
-                                      _remove(items[index]);
-                                    });
-                                  }),
-                            ]),
-                          ),
-                        );
-                      },
-                    )
-                  : const Center(child: Text('Brak urządzeń')),
-            ),
-          ],
+                            background: Container(),
+                            key: UniqueKey(),
+                            direction: DismissDirection.endToStart,
+                            child: ListTile(
+                              leading: const Icon(Icons.list),
+                              title: Text(items[index]),
+                              subtitle: Row(children: <Widget>[
+                                OutlinedButton(
+                                    child: Text('Dodaj do mapy'),
+                                    onPressed: () {
+                                      addMarkerToMap(index, items[index]);
+                                      setState(() {});
+                                    }),
+                                OutlinedButton(
+                                    child: Text('Usuń z bazy'),
+                                    onPressed: () {
+                                      setState(() {
+                                        _remove(items[index]);
+                                      });
+                                    }),
+                              ]),
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(child: Text('Brak urządzeń')),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -112,8 +117,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   LatLng? markerPosition;
 
   String userPositionMarkerId = Constans.topic;
-
-
 
   void addMarkerToMap(int markerIdCounter, String idMarkerValue) {
     final int markerCount = items.length;
@@ -127,8 +130,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     Constans.MarkersOnMap.add(markerIdVal);
     final MarkerId markerId = MarkerId(markerIdVal);
 
-    String topicLongLat =
-        "gpsDevice/$idMarkerValue/longLat"; //todo tu jest problem z dodawaniem telefonu
+    String topicLongLat = "gpsDevice/$idMarkerValue/longLat";
     Constans.topicList.add(topicLongLat);
     mqttConnect.subscribe(topicLongLat);
     gpsDeviceController.saveDeviceIDList();
@@ -150,7 +152,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
       if (markers.containsKey(markerId)) {
         markers.remove(markerId);
       }
-      markers.removeWhere((key,marker) => marker.markerId.value == "001");
+      markers.removeWhere((key, marker) => marker.markerId.value == "001");
       setState(() {
         markers.remove(markerId);
       });
@@ -200,8 +202,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
         'longitude': jsonInput['longitude'],
       });
 
-      // Example input for device: mqttConnect.publishMessage(topicLongLat,
-//           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},\"idGPS\":${idGPS.toString()}}');
       Map<String, dynamic> jsonInput2 = jsonDecode(getMessange);
       final String markerIdVal = jsonInput2['idGPS'];
       final MarkerId markerId = MarkerId(markerIdVal);
@@ -219,5 +219,4 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
     }
   }
-
- }
+}
