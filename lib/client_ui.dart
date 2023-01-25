@@ -218,6 +218,7 @@ class _ClientUiState extends State<ClientUi>
                       ListView.builder(
                           scrollDirection: Axis.vertical,
                           shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           itemCount: Constans.deviceIDList.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Column(children: [
