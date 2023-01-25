@@ -120,12 +120,15 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
   void addMarkerToMap(int markerIdCounter, String idMarkerValue) {
     final int markerCount = items.length;
-
-    if (markerCount == 30) {
-      return;
-    }
+    if(Constans.MarkersOnMap.contains(idMarkerValue))
+    {return;}
+    // if (markerCount == 30) {
+    //   return;
+    // }
 
     final String markerIdVal = idMarkerValue;
+
+
     markerIdCounter++;
     Constans.MarkersOnMap.add(markerIdVal);
     final MarkerId markerId = MarkerId(markerIdVal);
@@ -143,16 +146,18 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     setState(() {
       markers[markerId] = marker;
     });
-    // todo add Map topic and location
+
   }
 
   void _remove(markerId) {
-    Constans.topicList.remove(markerId);
+    Constans.MarkersOnMap.remove(markerId);
+    Constans.topicList.remove("gpsDevice/$markerId/longLat");
+    Constans.deviceIDList.remove(markerId);
     setState(() {
       if (markers.containsKey(markerId)) {
         markers.remove(markerId);
       }
-      markers.removeWhere((key, marker) => marker.markerId.value == "001");
+      markers.removeWhere((key, marker) => marker.markerId.value == markerId);
       setState(() {
         markers.remove(markerId);
       });

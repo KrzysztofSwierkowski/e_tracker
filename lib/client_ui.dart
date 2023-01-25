@@ -42,6 +42,7 @@ class _ClientUiState extends State<ClientUi>
     _getNewMessange();
     getNewMarkerLocation(_getMessange);
     // getCurrentLocation(_getMessange);
+    setState(() {});
     super.initState();
   }
 
@@ -285,6 +286,7 @@ class _ClientUiState extends State<ClientUi>
                                               tooltip: 'Pokaż na mapie',
                                               onPressed: () {
                                                 setState(() {
+                                                  //addMarkerToMap();
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
                                                           Constans.deviceIDList[

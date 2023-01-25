@@ -103,10 +103,7 @@ class _SettingsState extends State<Settings> {
             ElevatedButton(
                 style: Constans.yellowButtonStyle,
                 onPressed: () async {
-                  getIdGpsController.clear;
-                  Constans.deviceIDList.add(getIdGpsController.text);
-                  gpsDeviceController.saveDeviceIDList();
-                  getIdGpsController.clear();
+                  checkContainValueInDeviceIdList();
                 },
                 child: const Text(
                   'Dodaj',
@@ -197,6 +194,18 @@ class _SettingsState extends State<Settings> {
     super.dispose();
   }
 
+  void checkContainValueInDeviceIdList() {
+    if (Constans.deviceIDList.contains(getIdGpsController.text)) {
+      _showDialog(context);
+      getIdGpsController.clear();
+    } else {
+      // set up the AlertDialog
+      Constans.deviceIDList.add(getIdGpsController.text);
+      gpsDeviceController.saveDeviceIDList();
+      getIdGpsController.clear();
+    }
+  }
+
   Future<void> _DisplayGpsList(BuildContext context) async {
     if (deviceIDList.isEmpty) {
       showAlertDialog(context);
@@ -231,6 +240,26 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder: (BuildContext context) {
         return alert;
+      },
+    );
+  }
+
+  void _showDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("Uwaga!!"),
+          content: new Text("Urządzenie znajduje się już w bazie"),
+          actions: <Widget>[
+            new ElevatedButton(
+              child: new Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
   }
