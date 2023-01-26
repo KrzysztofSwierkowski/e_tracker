@@ -106,7 +106,7 @@ bool locationIsValid = true;
 
 
 //battery monitor value init:
-const int BatteryPin = 34;
+//const int BatteryPin = 34;
 int adc_read = 0;
 float battery_voltage = 0;
 
@@ -201,8 +201,8 @@ void setup() {
   // Restart takes quite some time
   // To skip it, call init() instead of restart()
   SerialMon.println("Initializing modem...");
-  modem.restart();
-  // modem.init();
+  //modem.restart();
+   modem.init();
 
   String modemInfo = modem.getModemInfo();
   SerialMon.print("Modem Info: ");
@@ -247,8 +247,10 @@ void setup() {
   GPS.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial.println("[GPS]: Serial initialize");
   Serial.println("[OBD2]: Bluetooth initialing...");
-  elm327Setup();
 
+
+ // elm327Setup();
+elm327Setup();
 
   // Try to initialize!
   Serial.println("[MPU6050]: Serial initializing...");
@@ -348,14 +350,14 @@ void gps_handler_task(void* parameters) {
     mqtt.loop();
     mqttReconnect();
     gyroTest();
-    batteryMonitor();
+    //batteryMonitor();
     sendGyro();
     searchGPS(1000);
     checkGps();
     sendLocation();
     sendAltitude();
     sendSpeed();
-    delay(3000);
+    //delay(3000);
     mqtt.loop();
     mqtt.setCallback(mqttCallback);
     delay(1);
@@ -465,15 +467,15 @@ void elm327LoopTest() {
 }
 
 
-void batteryMonitor() {
-  adc_read = analogRead(BatteryPin);
+// void batteryMonitor() {
+//   adc_read = analogRead(BatteryPin);
 
-  //using R1 = 5k and R2 = .650k
+//   //using R1 = 5k and R2 = .650k
 
-  battery_voltage = (adc_read * (6.065 / 4096) * (2.320)) / 0.430;
-  Serial.println("Batt:");
-  Serial.println(battery_voltage);
-}
+//   battery_voltage = (adc_read * (6.065 / 4096) * (2.320)) / 0.430;
+//   Serial.println("Batt:");
+//   Serial.println(battery_voltage);
+// }
 
 
 
