@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/provider.dart';
+
 import 'constans.dart';
+import 'gpsHandle/device_information.dart';
 import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
 
@@ -244,21 +247,23 @@ class _ClientUiState extends State<ClientUi>
                                         ),
                                         child: Column(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                                MainAxisAlignment.spaceAround,
                                             children: [
                                               TextButton(
                                                 child: Text(
-                                                  "ID : \"${Constans.deviceIDList[index]}\", DANE : TAK , OBDII : TAK , Ruch : TAK  ",
+                                                  "ID GPS: \"${Constans.deviceIDList[index]}\"",
                                                   style: whiteHintTextStyle15px,
                                                 ),
                                                 onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => const DeviceInformation()),
+                                                  );
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
                                                           Constans.deviceIDList[
                                                               index]));
                                                   setState(() {});
-                                                  print(Constans
-                                                      .deviceIDList[index]);
                                                 },
                                               ),
                                             ])),
@@ -286,7 +291,7 @@ class _ClientUiState extends State<ClientUi>
                                               tooltip: 'Pokaż na mapie',
                                               onPressed: () {
                                                 setState(() {
-                                                  //addMarkerToMap();
+                                                  GpsDevicesListState().addMarkerToMap(Constans.deviceIDList[index]);
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
                                                           Constans.deviceIDList[

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 
 import 'auth/auth.dart';
 import 'constans.dart';
+import 'gpsHandle/device_information.dart';
 import 'gpsHandle/gps_devices_list.dart';
+import 'mqtt_connect.dart';
 
 final AuthService _auth = AuthService();
 
@@ -21,6 +24,7 @@ class _SettingsState extends State<Settings> {
   final getIdGpsController = TextEditingController();
   final getIpMqttBroker = TextEditingController();
   GpsDeviceController gpsDeviceController = GpsDeviceController();
+  MqttConnect mqttConnect = MqttConnect();
 
   @override
   void initState() {
@@ -176,9 +180,27 @@ class _SettingsState extends State<Settings> {
                   style: Constans.yellowButtonStyle,
                   onPressed: () async {
                     //todo connection ELM stettings via BT, send to ESP by Mqtt.
+                    const DeviceInformation();
                   },
                   child: const Text(
                     'OBD ELM327 BLUETOOTH',
+                    style: Constans.blackTextStyleForYellowButton,
+                  )),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 25, 0, 25),
+              child: ElevatedButton(
+                  style: Constans.yellowButtonStyle,
+                  onPressed: ()  {
+                    _unSubscribeAllTopics();
+                    mqttConnect.disconnect();
+                    Constans.deviceIDList.clear();
+                    Constans.topicList.clear();
+                    Constans.MarkersOnMap.clear();
+
+                  },
+                  child: const Text(
+                    'Usuń wszystkie urządzenia',
                     style: Constans.blackTextStyleForYellowButton,
                   )),
             ),
@@ -189,10 +211,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void dispose() {
-    getIdGpsController.dispose();
-    super.dispose();
-  }
+
 
   void checkContainValueInDeviceIdList() {
     if (Constans.deviceIDList.contains(getIdGpsController.text)) {
@@ -263,6 +282,19 @@ class _SettingsState extends State<Settings> {
       },
     );
   }
+
+  Future<void> _unSubscribeAllTopics() async {
+    for (var i = 0; i < Constans.topicList.length; i++) {
+      mqttConnect.client.unsubscribe(Constans.topicList[i]);
+    }
+  }
+
+  void dispose() {
+    getIdGpsController.dispose();
+    gpsDeviceController.saveDeviceIDList();
+    super.dispose();
+  }
+
 }
 
 //todo theme changer (dark/white)

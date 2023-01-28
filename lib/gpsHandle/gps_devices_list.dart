@@ -16,10 +16,10 @@ class GpsDevicesList extends StatefulWidget {
   const GpsDevicesList({super.key});
 
   @override
-  _GpsDevicesListState createState() => _GpsDevicesListState();
+  GpsDevicesListState createState() => GpsDevicesListState();
 }
 
-class _GpsDevicesListState extends State<GpsDevicesList> {
+class GpsDevicesListState extends State<GpsDevicesList> {
   List<String> items = Constans.deviceIDList;
   GpsDeviceController gpsDeviceController = GpsDeviceController();
 
@@ -88,7 +88,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
                                 OutlinedButton(
                                     child: Text('Dodaj do mapy'),
                                     onPressed: () {
-                                      addMarkerToMap(index, items[index]);
+                                      addMarkerToMap(items[index]);
                                       setState(() {});
                                     }),
                                 OutlinedButton(
@@ -118,18 +118,19 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
 
   String userPositionMarkerId = Constans.topic;
 
-  void addMarkerToMap(int markerIdCounter, String idMarkerValue) {
-    final int markerCount = items.length;
-    if(Constans.MarkersOnMap.contains(idMarkerValue))
-    {return;}
+  void addMarkerToMap(String idMarkerValue) {
+    //void addMarkerToMap(int markerIdCounter, String idMarkerValue) {
+    // final int markerCount = items.length;
+    if (Constans.MarkersOnMap.contains(idMarkerValue)) {
+      return;
+    }
     // if (markerCount == 30) {
     //   return;
     // }
 
     final String markerIdVal = idMarkerValue;
 
-
-    markerIdCounter++;
+    // markerIdCounter++;
     Constans.MarkersOnMap.add(markerIdVal);
     final MarkerId markerId = MarkerId(markerIdVal);
 
@@ -146,7 +147,6 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
     setState(() {
       markers[markerId] = marker;
     });
-
   }
 
   void _remove(markerId) {
@@ -194,6 +194,7 @@ class _GpsDevicesListState extends State<GpsDevicesList> {
   @override
   void dispose() {
     mqttConnect.disconnect();
+    gpsDeviceController.saveDeviceIDList();
     super.dispose();
   }
 
