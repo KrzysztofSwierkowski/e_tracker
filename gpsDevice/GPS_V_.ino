@@ -7,7 +7,7 @@ TaskHandle_t ELM327_task;
 TaskHandle_t GPS_task;
 TaskHandle_t Mqtt_task;
 
-std::atomic<short> rpm{ 0 };
+//std::atomic<short> rpm{ 0 };
 ///////////////////////
 
 
@@ -19,6 +19,11 @@ std::atomic<short> rpm{ 0 };
 ////////////////////////////////////////////////////
 //ELM327 liblary
 #include "ELMduino.h"
+
+//variable for ELM327:
+float odometer = -1;
+float rpm = -1;
+
 //Bluetooth lib
 #include <BluetoothSerial.h>
 
@@ -43,14 +48,16 @@ static bool btScanSync = true;
 #define ELM_PORT SerialBT
 #define DEBUG_PORT Serial
 ELM327 myELM327;
-//uint32_t rpm = 0;
 ////////////////////////////////////////////////////
+//Flag for handle funtions
+int bluetoothPowerON = -1;
+int gpsPowerOn = -1;
+int obdIIPowerOn = -1;
+int accelerometerPowerOn = -1;
 
 
 
-
-
-
+//////////////////////////////////////////////////
 #define TINY_GSM_MODEM_SIM800
 #include <TinyGPS++.h>
 
@@ -132,10 +139,10 @@ char* topicSpeed = "gpsDevice/001/speed";
 char* topicAltitude = "gpsDevice/001/altitude";
 char* topicLongLat = "gpsDevice/001/longLat";
 char* topicInit = "gpsDevice/001/state";
-
-
-
-
+char* topicBluetoothPowerOn = "gpsDevice/001/BluetoothOn";
+char* topicObdIIPowerOn = "gpsDevice/001/obdIIOn";
+char* topicGpsPowerOn = "gpsDevice/001/GpsOn";
+char* topicaccelerometerPowerOn = "gpsDevice/001/accelerometerOn";
 
 const char* topic = "obdPower";
 
@@ -190,6 +197,74 @@ void setup() {
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
+  // Sim800L initializer
+  simInit();
+  //MQTT Setup:
+  mqttBrokerSetup();
+  //Subscribe topic:
+  subscribeInitTopic();
+  //GPS Setup:
+  gpsSetup();
+  // elm327Setup();
+  elm327Setup();
+  //accelerometr init:
+  mpu6050Init();
+  //
+  delay(1000);
+}
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+// MQTT init:
+void mqttBrokerSetup() {
+  // MQTT Broker setup
+  Serial.println("[SIM800L]: Initiating a mobile broadcast...");
+  mqtt.setServer(broker, 1883);
+  mqtt.setCallback(mqttCallback);
+}
+
+subscribeInitTopic(){
+  mqtt.subscribe(topicBluetoothPowerOn);
+  mqtt.subscribe(topicObdIIPowerOn);
+  mqtt.subscribe(topicGpsPowerOn);
+  mqtt.subscribe(topicaccelerometerPowerOn);
+}
+
+
+//GPS Setup:
+void gpsSetup(){
+    GPS.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("[GPS]: Serial initialize");
+}
+
+//MPU6050 Initialize
+void mpu6050Init() {
+  // Try to initialize!
+  Serial.println("[MPU6050]: Serial Initiating...");
+  if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+  }
+  Serial.println("MPU6050 Found!");
+
+  // set accelerometer range to +-8G
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+
+  // set gyro range to +- 500 deg/s
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+
+  // set filter bandwidth to 21 Hz
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+  threadsCreator();
+  motionDetectionByMPU6050Gyro();
+
+  Serial.println("End of [MPU6050] initializing! all ok !");
+}
+
+// Modem Sim800L initialize:
+
+void simInit() {
+    Serial.println("[SIM800L]: Initiating a mobile broadcast...");
   setupModem();
   SerialMon.println("Wait...");
 
@@ -202,7 +277,7 @@ void setup() {
   // To skip it, call init() instead of restart()
   SerialMon.println("Initializing modem...");
   //modem.restart();
-   modem.init();
+  modem.init();
 
   String modemInfo = modem.getModemInfo();
   SerialMon.print("Modem Info: ");
@@ -240,46 +315,6 @@ void setup() {
   if (modem.isGprsConnected()) {
     SerialMon.println("GPRS connected");
   }
-
-  // MQTT Broker setup
-  mqtt.setServer(broker, 1883);
-  mqtt.setCallback(mqttCallback);
-  GPS.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("[GPS]: Serial initialize");
-  Serial.println("[OBD2]: Bluetooth initialing...");
-
-
- // elm327Setup();
-elm327Setup();
-
-  // Try to initialize!
-  Serial.println("[MPU6050]: Serial initializing...");
-  if (!mpu.begin()) {
-    Serial.println("Failed to find MPU6050 chip");
-  }
-  Serial.println("MPU6050 Found!");
-
-  // set accelerometer range to +-8G
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-
-  // set gyro range to +- 500 deg/s
-  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-
-  // set filter bandwidth to 21 Hz
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-
-  threadsCreator();
-  motionDetectionByMPU6050Gyro();
-
-  Serial.println("End of [MPU6050] initializing! all ok !");
-
-  Serial.println("Subscribe topic: ");
-  Serial.println(topic);
-  mqtt.subscribe(topic);
-  mqtt.subscribe("gpsDevice/001/a.acceleration.z");
-  delay(1000);
-
-  //end init gyro
 }
 
 
@@ -287,6 +322,7 @@ elm327Setup();
 //EL327 Initialize (SETUP)
 
 void elm327Setup() {
+    Serial.println("[OBD2]: Bluetooth Initiating...");
   String name = "Android-Vlink";
   DEBUG_PORT.begin(115200);
   SerialBT.setPin("1234");
@@ -372,6 +408,7 @@ void get_ELM327_task(void* parameters) {
   if (connected) {
     for (;;) {
       mqttReconnect();
+      requestDataToELM327();
       elm327LoopTest();
       delay(1);
     }
@@ -432,21 +469,41 @@ void mqttReconnect() {
   }
 }
 
+void odometerDistance() {
+
+  if (myELM327.queryPID(01, 166))  //PID KM distance
+
+  {
+    int32_t kmDistanceOdometer = myELM327.findResponse();
+
+    if (myELM327.nb_rx_state == ELM_SUCCESS) {
+      odometer = kmDistanceOdometer;
+      Serial.print("Odometer Km: ");
+      Serial.println(odometer);
+    } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
+      myELM327.printError();
+    }
+  }
+}
+
+void requestDataToELM327() {
+  rpm = myELM327.rpm();
+}
+
 void elm327LoopTest() {
-  float tempRPM = myELM327.rpm();
+
 
   if (myELM327.nb_rx_state == ELM_SUCCESS) {
-    rpm = (uint32_t)tempRPM;
+
     Serial.print("RPM: ");
     Serial.println(rpm);
-    Serial.println(tempRPM);
 
 
     if (mqtt.connected()) {
 
       Serial.println("********** Publish speed by MQTT");
       char mqtt_payload[60] = "";
-      snprintf(mqtt_payload, 50, "%f", tempRPM);
+      snprintf(mqtt_payload, 50, "%f", rpm);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish("gpsDevice/001/rpm", mqtt_payload);
