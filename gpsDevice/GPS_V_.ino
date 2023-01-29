@@ -174,6 +174,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   Serial.println();
   Serial.println("-----------------------");
+  if(topic == topicGpsPowerOn){
+    int recv_payload = *(int *)payload;
+    gpsPowerOn = recv_payload;
+  }
 }
 
 boolean mqttConnect() {
@@ -223,7 +227,7 @@ void mqttBrokerSetup() {
   mqtt.setCallback(mqttCallback);
 }
 
-subscribeInitTopic(){
+void subscribeInitTopic(){
   mqtt.subscribe(topicBluetoothPowerOn);
   mqtt.subscribe(topicObdIIPowerOn);
   mqtt.subscribe(topicGpsPowerOn);
@@ -383,9 +387,8 @@ void gps_handler_task(void* parameters) {
   Serial.print("GPS_task running on core ");
   Serial.println(xPortGetCoreID());
   for (;;) {
-    mqtt.loop();
     mqttReconnect();
-    gyroTest();
+    //gyroTest();
     //batteryMonitor();
     sendGyro();
     searchGPS(1000);
@@ -408,12 +411,13 @@ void get_ELM327_task(void* parameters) {
   if (connected) {
     for (;;) {
       mqttReconnect();
-      requestDataToELM327();
+      odometerDistance();
       elm327LoopTest();
+      mqtt.loop();
       delay(1);
     }
   } else {
-    while (!SerialBT.connected(1000)) {
+    while (!SerialBT.connected(5000)) {
       Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
     }
   }
@@ -471,7 +475,7 @@ void mqttReconnect() {
 
 void odometerDistance() {
 
-  if (myELM327.queryPID(01, 166))  //PID KM distance
+  if (myELM327.queryPID(01,166))  //PID KM distance
 
   {
     int32_t kmDistanceOdometer = myELM327.findResponse();
@@ -486,12 +490,9 @@ void odometerDistance() {
   }
 }
 
-void requestDataToELM327() {
-  rpm = myELM327.rpm();
-}
-
 void elm327LoopTest() {
 
+rpm = myELM327.rpm();
 
   if (myELM327.nb_rx_state == ELM_SUCCESS) {
 
@@ -550,10 +551,10 @@ void motionDetectionByMPU6050Gyro() {
 
 void gyroTest() {
 
-
-  /* Get new sensor events with the readings */
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+ if(mpu.getMotionInterruptStatus()) {
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
 
   /* Print out the values */
   Serial.print("Acceleration X: ");
@@ -578,6 +579,7 @@ void gyroTest() {
 
   Serial.println("");
   delay(500);
+ }
 }
 
 
@@ -622,7 +624,7 @@ void checkChangeLocationAndSleep() {
         Serial.println("Start sleep...");
         // Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
         gpio_hold_en(GPIO_NUM_25);  //MODEM_POWER_ON
-                                    // esp_deep_sleep_start();
+        esp_deep_sleep_start();
         countChangesBelowInMeters = 0;
       }
     }
@@ -726,11 +728,10 @@ void sendGyro() {
 
     ledStatus = !ledStatus;
     digitalWrite(LED_GPIO, ledStatus);
-    if (mpu.getMotionInterruptStatus()) {
-
-      sensors_event_t a, g, temp;
-      mpu.getEvent(&a, &g, &temp);
-
+   if(mpu.getMotionInterruptStatus()) {
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
 
       Serial.println("********** Publish speed by MQTT");
       char mqtt_payload[50] = "";
@@ -768,6 +769,14 @@ void sendGyro() {
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish("obdPower", mqtt_payload);
+      Serial.println("> MQTT data published");
+      Serial.println("********** End ");
+      Serial.println("*****************************************************");
+
+      snprintf(mqtt_payload, 50, "1");
+      Serial.print("Publish message [GPS]: ");
+      Serial.println(mqtt_payload);
+      mqtt.publish(topicGpsPowerOn, mqtt_payload);
       Serial.println("> MQTT data published");
       Serial.println("********** End ");
       Serial.println("*****************************************************");
