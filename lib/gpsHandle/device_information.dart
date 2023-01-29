@@ -3,7 +3,6 @@ import 'package:phone_mqtt/client_ui.dart';
 import 'package:phone_mqtt/constans.dart' as constans;
 import 'package:phone_mqtt/mqtt_connect.dart';
 
-
 class DeviceInformation extends StatefulWidget {
   DeviceInformation({Key? key, required this.deviceId}) : super(key: key);
   String deviceId;
@@ -24,6 +23,7 @@ class _DeviceInformationState extends State<DeviceInformation> {
   bool BluetoothETracker = false;
   bool obdIIETracker = false;
   bool accelerometerETracker = false;
+
   @override
   void initState() {
     setupMqttClient();
@@ -47,12 +47,11 @@ class _DeviceInformationState extends State<DeviceInformation> {
         ),
         child: SafeArea(
           child: Column(children: [
-            Row(mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
-                children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
               Text("Urządzenie ${widget.deviceId} model \"E-Tracker\"   ",
                   textAlign: TextAlign.left,
-                  style: const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+                  style:
+                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
               Switch(
                 // This bool value toggles the switch.
                 value: IsETracker,
@@ -61,7 +60,12 @@ class _DeviceInformationState extends State<DeviceInformation> {
                   // This is called when the user toggles the switch.
                   setState(() {
                     IsETracker = value;
-                    if (!IsETracker) GpsETracker = value;
+                    if (!IsETracker) {
+                      GpsETracker = value;
+                      BluetoothETracker = value;
+                      accelerometerETracker = value;
+                      obdIIETracker = value;
+                    }
                     print(IsETracker);
                   });
                 },
@@ -71,159 +75,148 @@ class _DeviceInformationState extends State<DeviceInformation> {
               color: Color(0xffFFF800),
               height: 20,
             ),
-            Row(mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
-                children: [
-                  Text("GPS",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(color: Color(0xffffffff), fontSize: 15)),
-                  Switch(
-                    // This bool value toggles the switch.
-                    value: GpsETracker,
-                    activeColor: Colors.greenAccent,
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              Text("GPS",
+                  textAlign: TextAlign.left,
+                  style:
+                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+              Switch(
+                // This bool value toggles the switch.
+                value: GpsETracker,
+                activeColor: Colors.greenAccent,
 
-                    onChanged: (bool value) {
-                      // This is called when the user toggles the switch.
-                      setState(() {
-                        GpsETracker = value;
-                        if (IsETracker & GpsETracker) {
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/GpsPowerOn", "1");
-                          GpsETracker = value;
-                          print(GpsETracker);
-                        }
-                        else if (!GpsETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/GpsPowerOn", "-1");
-                          GpsETracker = value;
-                        }
-                        else if (!IsETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/GpsPowerOn", "-1");
-                          GpsETracker = !value;
-                        }
-
-                      });
-                    },
-                  ),
-                ]),
-            Row(mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
-                children: [
-                  Text("Wykrycie ruchu/kolizji",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(color: Color(0xffffffff), fontSize: 15)),
-                  Switch(
-                    // This bool value toggles the switch.
-                    value: accelerometerETracker,
-                    activeColor: Colors.greenAccent,
-                    onChanged: (bool value) {
-                      // This is called when the user toggles the switch.
-                      setState(() {
-                        accelerometerETracker = value;
-                        if (IsETracker & accelerometerETracker) {
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/accelerometerPowerOn", "1");
-                          accelerometerETracker = value;
-                          print(accelerometerETracker);
-                        }
-                        else if (!accelerometerETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/accelerometerPowerOn", "-1");
-                          accelerometerETracker = value;
-                        }
-                        else if (!IsETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/accelerometerPowerOn", "-1");
-                          accelerometerETracker = !value;
-                        }
-                      });
-                    },
-                  ),
-                ]),
-            Row(mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
-                children: [
-                  Text("ELM327 OBDII",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(color: Color(0xffffffff), fontSize: 15)),
-                  Switch(
-                    // This bool value toggles the switch.
-                    value: obdIIETracker,
-                    activeColor: Colors.greenAccent,
-                    onChanged: (bool value) {
-                      // This is called when the user toggles the switch.
-                      setState(() {
-                        obdIIETracker = value;
-                        if (IsETracker & obdIIETracker) {
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/obdIIPowerOn", "1");
-                          obdIIETracker = value;
-                          print(obdIIETracker);
-                        }
-                        else if (!obdIIETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/obdIIPowerOn", "-1");
-                          obdIIETracker = value;
-                        }
-                        else if (!IsETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/obdIIPowerOn", "-1");
-                          obdIIETracker = !value;
-                        }
-                      });
-                    },
-                  ),
-                ]),
-            Row(mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
-                children: [
-                  Text("Bluetooth",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(color: Color(0xffffffff), fontSize: 15)),
-                  Switch(
-                    // This bool value toggles the switch.
-                    value: BluetoothETracker,
-                    activeColor: Colors.greenAccent,
-                    onChanged: (bool value) {
-                      // This is called when the user toggles the switch.
-                      setState(() {
-                        BluetoothETracker = value;
-                        if (IsETracker & BluetoothETracker) {
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/BluetoothPowerOn", "1");
-                          BluetoothETracker = value;
-                          print(BluetoothETracker);
-                        }
-                        else if (!BluetoothETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/BluetoothPowerOn", "-1");
-                          BluetoothETracker = value;
-                        }
-                        else if (!IsETracker){
-                          sendValueoOfPowerState(
-                              "gpsDevice/${widget.deviceId}/BluetoothPowerOn", "-1");
-                          BluetoothETracker = !value;
-                        }
-                      });
-                    },
-                  ),
-                ]),
+                onChanged: (bool value) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    GpsETracker = value;
+                    if (IsETracker & GpsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/GpsPowerOn", "1");
+                      GpsETracker = value;
+                      print(GpsETracker);
+                    } else if (!GpsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/GpsPowerOn", "-1");
+                      GpsETracker = value;
+                    } else if (!IsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/GpsPowerOn", "-1");
+                      GpsETracker = !value;
+                    }
+                  });
+                },
+              ),
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              Text("Wykrycie ruchu/kolizji",
+                  textAlign: TextAlign.left,
+                  style:
+                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+              Switch(
+                // This bool value toggles the switch.
+                value: accelerometerETracker,
+                activeColor: Colors.greenAccent,
+                onChanged: (bool value) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    accelerometerETracker = value;
+                    if (IsETracker & accelerometerETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/accelerometerPowerOn",
+                          "1");
+                      accelerometerETracker = value;
+                      print(accelerometerETracker);
+                    } else if (!accelerometerETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/accelerometerPowerOn",
+                          "-1");
+                      accelerometerETracker = value;
+                    } else if (!IsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/accelerometerPowerOn",
+                          "-1");
+                      accelerometerETracker = !value;
+                    }
+                  });
+                },
+              ),
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              Text("ELM327 OBDII",
+                  textAlign: TextAlign.left,
+                  style:
+                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+              Switch(
+                // This bool value toggles the switch.
+                value: obdIIETracker,
+                activeColor: Colors.greenAccent,
+                onChanged: (bool value) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    obdIIETracker = value;
+                    if (IsETracker & obdIIETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/obdIIPowerOn", "1");
+                      obdIIETracker = value;
+                      print(obdIIETracker);
+                    } else if (!obdIIETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/obdIIPowerOn", "-1");
+                      obdIIETracker = value;
+                    } else if (!IsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/obdIIPowerOn", "-1");
+                      obdIIETracker = !value;
+                    }
+                  });
+                },
+              ),
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              Text("Bluetooth",
+                  textAlign: TextAlign.left,
+                  style:
+                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+              Switch(
+                // This bool value toggles the switch.
+                value: BluetoothETracker,
+                activeColor: Colors.greenAccent,
+                onChanged: (bool value) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    BluetoothETracker = value;
+                    if (IsETracker & BluetoothETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/BluetoothPowerOn", "1");
+                      BluetoothETracker = value;
+                      print(BluetoothETracker);
+                    } else if (!BluetoothETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/BluetoothPowerOn",
+                          "-1");
+                      BluetoothETracker = value;
+                    } else if (!IsETracker) {
+                      sendValueoOfPowerState(
+                          "gpsDevice/${widget.deviceId}/BluetoothPowerOn",
+                          "-1");
+                      BluetoothETracker = !value;
+                    }
+                  });
+                },
+              ),
+            ]),
           ]),
         ),
       ),
     );
   }
 
-  void sendValueoOfPowerState(topic,messange) {
+  void sendValueoOfPowerState(topic, messange) {
     mqttConnect.publishMessage(topic, "$messange");
   }
-
-
 
   Future<void> setupMqttClient() async {
     await mqttConnect.connect();
     subscribeDeviceSetupTopics();
   }
-
 }
