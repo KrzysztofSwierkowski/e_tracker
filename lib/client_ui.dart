@@ -257,7 +257,7 @@ class _ClientUiState extends State<ClientUi>
                                                 onPressed: () {
                                                   Navigator.push(
                                                     context,
-                                                    MaterialPageRoute(builder: (context) => const DeviceInformation()),
+                                                    MaterialPageRoute(builder: (context) => DeviceInformation(deviceId: Constans.deviceIDList[index])),
                                                   );
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
@@ -401,6 +401,7 @@ class _ClientUiState extends State<ClientUi>
   //Ends Connection
   @override
   void dispose() {
+    super.dispose();
     mqttConnect.disconnect();
     _unSubscribeAllTopics();
     // super.dispose();
