@@ -13,6 +13,17 @@ String topic = FirebaseAuth.instance.currentUser!.uid;
 // String topicIP = "gpsDevice/GPS001/ip";
 String topicCurrentDeviceName = "Android";
 
+        //Gps variables:
+int BluetoothPowerOn = -1;
+int obdIIPowerOn = -1;
+int GpsPowerOn = -1;
+int accelerometerPowerOn = -1;
+bool IsETracker = false;
+bool GpsETracker = false;
+bool BluetoothETracker = false;
+bool obdIIETracker = false;
+bool accelerometerETracker = false;
+
 //Lists
 
 String ipBroker = "rsttpl.ddns.net"; //broker ip address

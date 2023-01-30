@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_mqtt/client_ui.dart';
 import 'package:phone_mqtt/constans.dart' as constans;
@@ -108,10 +109,10 @@ class _DeviceInformationState extends State<DeviceInformation> {
               ),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              Text("Wykrycie ruchu/kolizji",
+              const Text("Wykrycie ruchu/kolizji",
                   textAlign: TextAlign.left,
                   style:
-                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+                      TextStyle(color: Color(0xffffffff), fontSize: 15)),
               Switch(
                 // This bool value toggles the switch.
                 value: accelerometerETracker,
@@ -142,10 +143,10 @@ class _DeviceInformationState extends State<DeviceInformation> {
               ),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              Text("ELM327 OBDII",
+              const Text("ELM327 OBDII",
                   textAlign: TextAlign.left,
                   style:
-                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+                      TextStyle(color: Color(0xffffffff), fontSize: 15)),
               Switch(
                 // This bool value toggles the switch.
                 value: obdIIETracker,
@@ -173,10 +174,10 @@ class _DeviceInformationState extends State<DeviceInformation> {
               ),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              Text("Bluetooth",
+              const Text("Bluetooth",
                   textAlign: TextAlign.left,
                   style:
-                      const TextStyle(color: Color(0xffffffff), fontSize: 15)),
+                      TextStyle(color: Color(0xffffffff), fontSize: 15)),
               Switch(
                 // This bool value toggles the switch.
                 value: BluetoothETracker,
@@ -189,7 +190,9 @@ class _DeviceInformationState extends State<DeviceInformation> {
                       sendValueoOfPowerState(
                           "gpsDevice/${widget.deviceId}/BluetoothPowerOn", "1");
                       BluetoothETracker = value;
-                      print(BluetoothETracker);
+                      if (kDebugMode) {
+                        print(BluetoothETracker);
+                      }
                     } else if (!BluetoothETracker) {
                       sendValueoOfPowerState(
                           "gpsDevice/${widget.deviceId}/BluetoothPowerOn",
