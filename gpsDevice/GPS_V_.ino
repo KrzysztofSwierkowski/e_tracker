@@ -22,7 +22,27 @@ TaskHandle_t Mqtt_task;
 
 //variable for ELM327:
 float odometer = -1;
-float rpm = -1;
+float rpm = 0;
+float mph = 0;
+uint16_t freezeDTC;
+
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+const unsigned long period = 600000;  //the value is a number of milliseconds
+
+typedef enum { ENG_RPM,
+               SPEED,freezeDTCs } obd_pid_states;
+obd_pid_states obd_state = ENG_RPM;
+
+
+enum bluetoothConnectionStates {
+  connneting,
+  connectedState,
+  disconnected,
+};
+
+enum bluetoothConnectionStates elm327State;
+
 
 //Bluetooth lib
 #include <BluetoothSerial.h>
@@ -174,8 +194,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   Serial.println();
   Serial.println("-----------------------");
-  if(topic == topicGpsPowerOn){
-    int recv_payload = *(int *)payload;
+  if (topic == topicGpsPowerOn) {
+    int recv_payload = *(int*)payload;
     gpsPowerOn = recv_payload;
   }
 }
@@ -227,7 +247,7 @@ void mqttBrokerSetup() {
   mqtt.setCallback(mqttCallback);
 }
 
-void subscribeInitTopic(){
+void subscribeInitTopic() {
   mqtt.subscribe(topicBluetoothPowerOn);
   mqtt.subscribe(topicObdIIPowerOn);
   mqtt.subscribe(topicGpsPowerOn);
@@ -236,8 +256,8 @@ void subscribeInitTopic(){
 
 
 //GPS Setup:
-void gpsSetup(){
-    GPS.begin(9600, SERIAL_8N1, RXD2, TXD2);
+void gpsSetup() {
+  GPS.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial.println("[GPS]: Serial initialize");
 }
 
@@ -268,7 +288,7 @@ void mpu6050Init() {
 // Modem Sim800L initialize:
 
 void simInit() {
-    Serial.println("[SIM800L]: Initiating a mobile broadcast...");
+  Serial.println("[SIM800L]: Initiating a mobile broadcast...");
   setupModem();
   SerialMon.println("Wait...");
 
@@ -326,11 +346,12 @@ void simInit() {
 //EL327 Initialize (SETUP)
 
 void elm327Setup() {
-    Serial.println("[OBD2]: Bluetooth Initiating...");
+  Serial.println("[OBD2]: Bluetooth Initiating...");
   String name = "Android-Vlink";
   DEBUG_PORT.begin(115200);
   SerialBT.setPin("1234");
   ELM_PORT.begin("E-Tracker", true);
+  elm327State = connneting;
   bool connected;
   connected = SerialBT.connect(name);
   if (!ELM_PORT.connect(name)) {  //nazwa urzadzenia
@@ -339,6 +360,7 @@ void elm327Setup() {
 
   if (!myELM327.begin(ELM_PORT, true, 2000)) {
     Serial.println("Couldn't connect to OBD scanner - Phase 2");
+    elm327State = disconnected;
     if (mqtt.connected()) {
 
       // Serial.println("********** Publish speed by MQTT");
@@ -353,7 +375,7 @@ void elm327Setup() {
     }
     return;
   }
-
+  elm327State = connectedState;
   Serial.println("Connected to ELM327");
 }
 
@@ -475,7 +497,7 @@ void mqttReconnect() {
 
 void odometerDistance() {
 
-  if (myELM327.queryPID(01,166))  //PID KM distance
+  if (myELM327.queryPID(01, 166))  //PID KM distance
 
   {
     int32_t kmDistanceOdometer = myELM327.findResponse();
@@ -492,17 +514,31 @@ void odometerDistance() {
 
 void elm327LoopTest() {
 
-rpm = myELM327.rpm();
+  if (!mqtt.connected()) {
+    mqttReconnect();
+  }
+  currentMillis = millis();
+  if (currentMillis - startMillis >= period)  //test whether the period has elapsed
+  {
+    if (elm327State = disconnected) {
+      elm327Setup();
+    }
+    startMillis = currentMillis;  //IMPORTANT to save the start time of the current LED state.
+  }
 
-  if (myELM327.nb_rx_state == ELM_SUCCESS) {
+  /////////////////////////////
 
-    Serial.print("RPM: ");
-    Serial.println(rpm);
+  switch (obd_state) {
+    case ENG_RPM:
+      {
+        rpm = myELM327.rpm();
 
+        if (myELM327.nb_rx_state == ELM_SUCCESS) {
+          Serial.print("rpm: ");
+          Serial.println(rpm);
 
-    if (mqtt.connected()) {
-
-      Serial.println("********** Publish speed by MQTT");
+          ////////MQTT:
+                Serial.println("********** Publish speed by MQTT");
       char mqtt_payload[60] = "";
       snprintf(mqtt_payload, 50, "%f", rpm);
       Serial.print("Publish message: ");
@@ -511,14 +547,105 @@ rpm = myELM327.rpm();
       Serial.println("> MQTT data published");
       Serial.println("********** End ");
       Serial.println("*****************************************************");
-      delay(3000);
-    }
+
+      ///////////////////////////
+          obd_state = SPEED;
+        } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
+          myELM327.printError();
+          obd_state = SPEED;
+        }
+
+        break;
+      }
+
+    case SPEED:
+      {
+        mph = myELM327.mph();
+
+        if (myELM327.nb_rx_state == ELM_SUCCESS) {
+          Serial.print("mph: ");
+          Serial.println(mph);
+          obd_state = freezeDTCs;
+        } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
+          myELM327.printError();
+          obd_state = freezeDTCs;
+        }
+
+        break;
+      }
+
+    case freezeDTCs:
+      {
+        freezeDTC = myELM327.freezeDTC();
+
+        if (myELM327.nb_rx_state == ELM_SUCCESS) {
+          Serial.print("DTC: ");
+          Serial.println(freezeDTC);
+
+////////MQTT:
+ // Serial.println("********** Publish speed by MQTT");
+      Serial.println("********** Publish speed by MQTT");
+      char mqtt_payload[600] = "";
+      snprintf(mqtt_payload, 500, "%f", freezeDTC);
+      Serial.print("Publish message: ");
+      Serial.println(mqtt_payload);
+      mqtt.publish("gpsDevice/001/dtc", mqtt_payload);
+      Serial.println("> MQTT data published");
+      Serial.println("********** End ");
+      Serial.println("*****************************************************");
+      ////////////////////
+
+          obd_state = ENG_RPM;
+        } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
+          myELM327.printError();
+          obd_state = ENG_RPM;
+        }
+
+        break;
+      }
 
 
-  } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
-    Serial.print("BŁĄD:");
-    myELM327.printError();
+
   }
+
+
+
+
+  ///////////////////
+
+
+
+
+
+
+
+  // rpm = myELM327.rpm();
+
+  // if (myELM327.nb_rx_state == ELM_SUCCESS) {
+
+  //   Serial.print("RPM: ");
+  //   Serial.println(rpm);
+
+
+  //   if (mqtt.connected()) {
+
+  //     Serial.println("********** Publish speed by MQTT");
+  //     char mqtt_payload[60] = "";
+  //     snprintf(mqtt_payload, 50, "%f", rpm);
+  //     Serial.print("Publish message: ");
+  //     Serial.println(mqtt_payload);
+  //     mqtt.publish("gpsDevice/001/rpm", mqtt_payload);
+  //     Serial.println("> MQTT data published");
+  //     Serial.println("********** End ");
+  //     Serial.println("*****************************************************");
+  //     delay(3000);
+  //   }
+
+
+  // } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
+  //   Serial.print("BŁĄD:");
+  //   myELM327.printError();
+  // }
 
 
   return;
@@ -551,35 +678,35 @@ void motionDetectionByMPU6050Gyro() {
 
 void gyroTest() {
 
- if(mpu.getMotionInterruptStatus()) {
+  if (mpu.getMotionInterruptStatus()) {
     /* Get new sensor events with the readings */
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
 
-  /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(a.acceleration.x);
-  Serial.print(", Y: ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", Z: ");
-  Serial.print(a.acceleration.z);
-  Serial.println(" m/s^2");
+    /* Print out the values */
+    Serial.print("Acceleration X: ");
+    Serial.print(a.acceleration.x);
+    Serial.print(", Y: ");
+    Serial.print(a.acceleration.y);
+    Serial.print(", Z: ");
+    Serial.print(a.acceleration.z);
+    Serial.println(" m/s^2");
 
-  Serial.print("Rotation X: ");
-  Serial.print(g.gyro.x);
-  Serial.print(", Y: ");
-  Serial.print(g.gyro.y);
-  Serial.print(", Z: ");
-  Serial.print(g.gyro.z);
-  Serial.println(" rad/s");
+    Serial.print("Rotation X: ");
+    Serial.print(g.gyro.x);
+    Serial.print(", Y: ");
+    Serial.print(g.gyro.y);
+    Serial.print(", Z: ");
+    Serial.print(g.gyro.z);
+    Serial.println(" rad/s");
 
-  Serial.print("Temperature: ");
-  Serial.print(temp.temperature);
-  Serial.println(" degC");
+    Serial.print("Temperature: ");
+    Serial.print(temp.temperature);
+    Serial.println(" degC");
 
-  Serial.println("");
-  delay(500);
- }
+    Serial.println("");
+    delay(500);
+  }
 }
 
 
@@ -624,7 +751,7 @@ void checkChangeLocationAndSleep() {
         Serial.println("Start sleep...");
         // Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
         gpio_hold_en(GPIO_NUM_25);  //MODEM_POWER_ON
-        esp_deep_sleep_start();
+                                    //       esp_deep_sleep_start();
         countChangesBelowInMeters = 0;
       }
     }
@@ -728,10 +855,10 @@ void sendGyro() {
 
     ledStatus = !ledStatus;
     digitalWrite(LED_GPIO, ledStatus);
-   if(mpu.getMotionInterruptStatus()) {
-    /* Get new sensor events with the readings */
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
+    if (mpu.getMotionInterruptStatus()) {
+      /* Get new sensor events with the readings */
+      sensors_event_t a, g, temp;
+      mpu.getEvent(&a, &g, &temp);
 
       Serial.println("********** Publish speed by MQTT");
       char mqtt_payload[50] = "";
