@@ -191,8 +191,7 @@ class _SettingsState extends State<Settings> {
                     style: Constans.blackTextStyleForYellowButton,
                   )),
             ),
-            //]),
-          ]),
+            ]),
         ),
       ),
     );

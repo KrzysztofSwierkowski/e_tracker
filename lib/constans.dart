@@ -30,6 +30,8 @@ String ipBroker = "rsttpl.ddns.net"; //broker ip address
 List<String> deviceIDList = [];
 List<String> topicList = [];
 List<String> MarkersOnMap = [];
+Map<dynamic, dynamic> lastKnownLocation = {};
+
 Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 String google_api_key = "AIzaSyDA60M1bFZGiO_tFqTfiQUbrvCIyZ5u3NI";
 

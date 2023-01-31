@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
+import 'package:phone_mqtt/database/testdb.dart';
 import 'package:phone_mqtt/provider.dart';
 
 import 'constans.dart';
@@ -30,6 +31,7 @@ class _ClientUiState extends State<ClientUi>
   MqttConnect mqttConnect = MqttConnect();
   Provider provider = Provider();
   GpsDevicesList gpsDevicesList = GpsDevicesList();
+  TestDB testDB = TestDB();
 
   //init a variable
 
@@ -42,6 +44,7 @@ class _ClientUiState extends State<ClientUi>
   @override
   void initState() {
     setupMqttClient();
+    getLastKnownMarkerlocation();
     _getNewMessange();
     getNewMarkerLocation(_getMessange);
     // getCurrentLocation(_getMessange);
@@ -257,7 +260,12 @@ class _ClientUiState extends State<ClientUi>
                                                 onPressed: () {
                                                   Navigator.push(
                                                     context,
-                                                    MaterialPageRoute(builder: (context) => DeviceInformation(deviceId: Constans.deviceIDList[index])),
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            DeviceInformation(
+                                                                deviceId: Constans
+                                                                        .deviceIDList[
+                                                                    index])),
                                                   );
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
@@ -291,7 +299,9 @@ class _ClientUiState extends State<ClientUi>
                                               tooltip: 'Pokaż na mapie',
                                               onPressed: () {
                                                 setState(() {
-                                                  GpsDevicesListState().addMarkerToMap(Constans.deviceIDList[index]);
+                                                  GpsDevicesListState()
+                                                      .addMarkerToMap(Constans
+                                                          .deviceIDList[index]);
                                                   _animateMapCameraToMarker(
                                                       MarkerId(
                                                           Constans.deviceIDList[
@@ -357,6 +367,32 @@ class _ClientUiState extends State<ClientUi>
 
   void _reconnect() => {setupMqttClient(), _getNewMessange()};
 
+  void getLastKnownMarkerlocation() async {
+    for (int i = 0; i < Constans.deviceIDList.length; i++) {
+      testDB.getLastKnownLocalization(Constans.deviceIDList[i]);
+      LocationData newLocation = LocationData.fromMap({
+        'latitude': Constans.lastKnownLocation['latitude'],
+        'longitude': Constans.lastKnownLocation['longitude'],
+      });
+      print(
+          "Position ======== latitude: ${newLocation.latitude} ========longitude:  ${newLocation.longitude}================ID:  ${Constans.deviceIDList[i]}");
+
+      final MarkerId markerId = MarkerId(Constans.deviceIDList[i]);
+      final Marker marker = Marker(
+        markerId: markerId,
+        position: LatLng(newLocation.latitude!, newLocation.longitude!),
+        infoWindow: InfoWindow(title: Constans.deviceIDList[i], snippet: '*'),
+      );
+
+      setState(() {
+        Constans.markers[markerId] = marker;
+      });
+
+
+
+    }
+  }
+
   void getNewMarkerLocation(String getMessange) async {
     if (getMessange.isNotEmpty) {
       Map<String, dynamic> jsonInput = jsonDecode(getMessange);
@@ -364,11 +400,10 @@ class _ClientUiState extends State<ClientUi>
         'latitude': jsonInput['latitude'],
         'longitude': jsonInput['longitude'],
       });
-
-      // Example input for device: mqttConnect.publishMessage(topicLongLat,
-//           '{\"latitude\":${currentLocation!.latitude.toString()},\"longitude\":${currentLocation!.longitude.toString()},\"idGPS\":${idGPS.toString()}}');
       Map<String, dynamic> jsonInput2 = jsonDecode(getMessange);
       final String markerIdVal = jsonInput2['idGPS'];
+      testDB.saveData(
+          newLocation.latitude!, newLocation.longitude!, markerIdVal);
       final MarkerId markerId = MarkerId(markerIdVal);
       final Marker marker = Marker(
         markerId: markerId,
