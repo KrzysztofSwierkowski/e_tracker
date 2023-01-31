@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mqtt_client/mqtt_client.dart';
 import 'package:phone_mqtt/constans.dart' as Constans;
 import 'package:phone_mqtt/gpsHandle/gps_device_controller.dart';
 
 import 'auth/auth.dart';
 import 'constans.dart';
-import 'gpsHandle/device_information.dart';
 import 'gpsHandle/gps_devices_list.dart';
 import 'mqtt_connect.dart';
 
