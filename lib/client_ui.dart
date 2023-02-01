@@ -88,6 +88,7 @@ class _ClientUiState extends State<ClientUi>
   Widget build(BuildContext context) {
     super.build(context);
     getNewMarkerLocation(_getMessange);
+    //getLastKnownMarkerlocation();
     return Container(
       constraints: const BoxConstraints.expand(),
       decoration: const BoxDecoration(
@@ -302,12 +303,8 @@ class _ClientUiState extends State<ClientUi>
                                                   GpsDevicesListState()
                                                       .addMarkerToMap(Constans
                                                           .deviceIDList[index]);
-                                                  _animateMapCameraToMarker(
-                                                      MarkerId(
-                                                          Constans.deviceIDList[
-                                                              index]));
-                                                  print(Constans
-                                                      .deviceIDList[index]);
+                                                  _animateMapCameraToMarker(MarkerId(Constans.deviceIDList[index]));
+                                                  print(Constans.deviceIDList[index]);
                                                 });
                                               },
                                             ),
@@ -427,7 +424,10 @@ class _ClientUiState extends State<ClientUi>
   }
 
   Future<void> _animateMapCameraToMarker(MarkerId markerId) async {
-    final Marker marker = markers[markerId]!;
+
+    if(markers[markerId] == null) {getLastKnownMarkerlocation();}
+   final Marker marker = markers[markerId]!;
+   print(marker.position);
     final LatLng currentPosition = marker.position;
     GoogleMapController googleMapController = await _controller.future;
     googleMapController.animateCamera(CameraUpdate.newLatLng(currentPosition));
