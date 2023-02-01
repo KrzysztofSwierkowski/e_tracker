@@ -44,7 +44,7 @@ class _ClientUiState extends State<ClientUi>
   @override
   void initState() {
     setupMqttClient();
-    getLastKnownMarkerlocation();
+    //getLastKnownMarkerlocation();
     _getNewMessange();
     getNewMarkerLocation(_getMessange);
     // getCurrentLocation(_getMessange);
