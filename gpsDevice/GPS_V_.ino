@@ -9,7 +9,7 @@
 
 //std::atomic<short> rpm{ 0 };
 ///////////////////////
-//storing data liblary by preferences 
+//storing data liblary by preferences
 
 #include <Preferences.h>
 Preferences preferences;
@@ -32,12 +32,14 @@ float rpm = 0;
 float mph = 0;
 uint16_t freezeDTC;
 
+
 unsigned long startMillis;  //some global variables available anywhere in the program
 unsigned long currentMillis;
 const unsigned long period = 600000;  //the value is a number of milliseconds
 
 typedef enum { ENG_RPM,
-               SPEED,freezeDTCs } obd_pid_states;
+               SPEED,
+               freezeDTCs } obd_pid_states;
 obd_pid_states obd_state = ENG_RPM;
 
 
@@ -62,7 +64,6 @@ enum bluetoothConnectionStates elm327State;
 #endif
 
 BluetoothSerial SerialBT;
-
 
 #define BT_DISCOVER_TIME 10000
 
@@ -124,9 +125,11 @@ Adafruit_MPU6050 mpu;  //22 scl, 21 SDA
 #define TIME_TO_SLEEP 60          /* Time ESP32 will go to sleep (in seconds) */
 TinyGPSPlus gps;
 
+bool stateOfSleepMode = false;
+
 // GPS VARIABLES
 //------------------------------------------------------------------------------------
-
+int minimalDistanceChange = 2;
 double latitude = 0.00;
 double longitude = 0.00;
 int countChangesBelowInMeters = 0;
@@ -136,7 +139,7 @@ double altitude = 0.00;
 double altitudeOld = 0.00;
 const char* idGPS = "001";
 bool locationIsValid = true;
-
+int noChangePositionSleepTriger = 30;
 
 //battery monitor value init:
 //const int BatteryPin = 34;
@@ -159,9 +162,13 @@ const char gprsUser[] = "";
 const char gprsPass[] = "";
 
 // MQTT details
+
+const char* deviceName = "gps001";
+const char* user = "rstt";
+const char* password = "3333";
 const char* broker = "rsttpl.ddns.net";
 
-char* topicSpeed = "gpsDevice/001/speed";  
+char* topicSpeed = "gpsDevice/001/speed";
 char* topicAltitude = "gpsDevice/001/altitude";
 char* topicLongLat = "gpsDevice/001/longLat";
 char* topicInit = "gpsDevice/001/state";
@@ -171,6 +178,7 @@ char* topicGpsPowerOn = "gpsDevice/001/GpsOn";
 char* topicaccelerometerPowerOn = "gpsDevice/001/accelerometerOn";
 char* topicMotionTrigger = "gpsDevice/001/MotionTrigger";
 char* topicMotion = "gpsDevice/001/Motion";
+char* stateOfSleepModeTopic = "gpsDevice/001/stateOfSleepMode";
 
 const char* topic = "obdPower";
 
@@ -213,7 +221,7 @@ boolean mqttConnect() {
   SerialMon.print(broker);
 
   // Or, if you want to authenticate MQTT:
-  boolean status = mqtt.connect("gps001", "rstt", "3333");
+  boolean status = mqtt.connect(deviceName, user, password);
 
   if (status == false) {
     SerialMon.println(" fail");
@@ -224,8 +232,24 @@ boolean mqttConnect() {
   return mqtt.connected();
 }
 
+void print_wakeup_reason(){
+esp_sleep_wakeup_cause_t wakeup_reason;
+
+wakeup_reason = esp_sleep_get_wakeup_cause();
+
+switch(wakeup_reason)
+{
+case 1 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
+case 2 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
+case 3 : Serial.println("Wakeup caused by timer"); break;
+case 4 : Serial.println("Wakeup caused by touchpad"); break;
+case 5 : Serial.println("Wakeup caused by ULP program"); break;
+default : Serial.println("Wakeup was not caused by deep sleep"); break;
+}
+}
 
 void setup() {
+  print_wakeup_reason();
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
@@ -240,7 +264,7 @@ void setup() {
   //GPS Setup:
   gpsSetup();
   // elm327Setup();
-//  elm327Setup();
+  //  elm327Setup();
   //accelerometr init:
   mpu6050Init();
   gyroTest();
@@ -249,10 +273,9 @@ void setup() {
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 
-//shared preferences initialize 
-void preferencesInit(){
+//shared preferences initialize
+void preferencesInit() {
   preferences.begin("lastlocation", false);
-
 }
 
 // MQTT init:
@@ -489,16 +512,16 @@ static void searchGPS(unsigned long ms) {
 
 void loop() {
   //vTaskDelete(NULL);
-    mqttReconnect();
-    //batteryMonitor();
-    sendGyro();
-    searchGPS(1000);
-    checkGps();
-    sendLocation();
-    sendAltitude();
-    sendSpeed();
-    mqtt.loop();
-    mqtt.setCallback(mqttCallback);
+  mqttReconnect();
+  //batteryMonitor();
+  sendGyro();
+  searchGPS(1000);
+  checkGps();
+  sendLocation();
+  sendAltitude();
+  sendSpeed();
+  mqtt.loop();
+  mqtt.setCallback(mqttCallback);
 }
 
 void gyroTest() {
@@ -596,17 +619,17 @@ void elm327LoopTest() {
           Serial.println(rpm);
 
           ////////MQTT:
-                Serial.println("********** Publish speed by MQTT");
-      char mqtt_payload[60] = "";
-      snprintf(mqtt_payload, 50, "%f", rpm);
-      Serial.print("Publish message: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish("gpsDevice/001/rpm", mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
-      Serial.println("*****************************************************");
+          Serial.println("********** Publish speed by MQTT");
+          char mqtt_payload[60] = "";
+          snprintf(mqtt_payload, 50, "%f", rpm);
+          Serial.print("Publish message: ");
+          Serial.println(mqtt_payload);
+          mqtt.publish("gpsDevice/001/rpm", mqtt_payload);
+          Serial.println("> MQTT data published");
+          Serial.println("********** End ");
+          Serial.println("*****************************************************");
 
-      ///////////////////////////
+          ///////////////////////////
           obd_state = SPEED;
         } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
           myELM327.printError();
@@ -640,18 +663,18 @@ void elm327LoopTest() {
           Serial.print("DTC: ");
           Serial.println(freezeDTC);
 
-////////MQTT:
- // Serial.println("********** Publish speed by MQTT");
-      Serial.println("********** Publish speed by MQTT");
-      char mqtt_payload[600] = "";
-      snprintf(mqtt_payload, 500, "%f", freezeDTC);
-      Serial.print("Publish message: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish("gpsDevice/001/dtc", mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
-      Serial.println("*****************************************************");
-      ////////////////////
+          ////////MQTT:
+          // Serial.println("********** Publish speed by MQTT");
+          Serial.println("********** Publish speed by MQTT");
+          char mqtt_payload[600] = "";
+          snprintf(mqtt_payload, 500, "%f", freezeDTC);
+          Serial.print("Publish message: ");
+          Serial.println(mqtt_payload);
+          mqtt.publish("gpsDevice/001/dtc", mqtt_payload);
+          Serial.println("> MQTT data published");
+          Serial.println("********** End ");
+          Serial.println("*****************************************************");
+          ////////////////////
 
           obd_state = ENG_RPM;
         } else if (myELM327.nb_rx_state != ELM_GETTING_MSG) {
@@ -661,9 +684,6 @@ void elm327LoopTest() {
 
         break;
       }
-
-
-
   }
 
 
@@ -727,7 +747,7 @@ void motionDetectionByMPU6050Gyro() {
   //setupt motion detection
   mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
   mpu.setMotionDetectionThreshold(1);
-  mpu.setMotionDetectionDuration(20);
+  mpu.setMotionDetectionDuration(500);
   mpu.setInterruptPinLatch(true);  // Keep it latched.  Will turn off when reinitialized.
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
@@ -749,13 +769,20 @@ void checkChangeLocationAndSleep() {
     // Serial.println(diffCordLon, 8);
 
 
-    float delLat = abs(latitude - newlatitude) * 6371;
-    float delLong = 6371 * abs(longitude - newlongitude) * cos(radians((latitude - newlatitude) / 2));
-    float distance = (sqrt(pow(delLat, 2) + pow(delLong, 2))) * 1000;  //distance in meters
+    // float delLat = abs(latitude - newlatitude) * 6371;
+    // float delLong = 6371 * abs(longitude - newlongitude) * cos(radians((latitude - newlatitude) / 2));
+    // float distance = (sqrt(pow(delLat, 2) + pow(delLong, 2))) * 1000;  //
+
+    float delLat = abs(latitude - newlatitude);
+    float delLong = abs(longitude - newlongitude);
+    float distance = ((sqrt(pow(delLat, 2) + pow(delLong, 2))) * 73) * 1000;  //
+
+
+    Serial.println("distance in meters");
     Serial.println(distance, 3);
 
     //Sleep flag reset :
-    if (distance >= 10) {
+    if (distance >= 2) {
       changesMoreThanSleepLimit++;
       Serial.println(changesMoreThanSleepLimit);
       if (changesMoreThanSleepLimit >= 3) {
@@ -764,21 +791,32 @@ void checkChangeLocationAndSleep() {
       }
     }
 
-    if (distance <= 10) {
+    if (distance <= minimalDistanceChange) {
       countChangesBelowInMeters++;
       Serial.println("how many is the same position");
       Serial.println(countChangesBelowInMeters);
-      if (countChangesBelowInMeters >= 30) {
+      if (countChangesBelowInMeters >= noChangePositionSleepTriger) {
         esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-        esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1);
+        esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 0);
         Serial.println("Start sleep...");
         // Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
         gpio_hold_en(GPIO_NUM_25);  //MODEM_POWER_ON
-      esp_deep_sleep_start();
-        countChangesBelowInMeters = 0;
+        stateOfSleepMode = true;
+        sendSleepState();
+        Serial.flush();
+        delay(5000);
+        esp_deep_sleep_start();
       }
     }
   }
+}
+
+void sendSleepState() {
+  char mqtt_payload[40] = "";
+  snprintf(mqtt_payload, 40, "{\"SleepMode\":%d,\"idGPS\":\"%s\"}", stateOfSleepMode, idGPS);
+  Serial.print("Publish message: ");
+  Serial.println(mqtt_payload);
+  mqtt.publish(stateOfSleepModeTopic, mqtt_payload);
 }
 
 void sendLocation() {
@@ -849,16 +887,16 @@ void sendAltitude() {
 
     double latitude = preferences.getDouble("latitude", 0);
     double longitude = preferences.getDouble("longitude", 0);
-    
+
     Serial.println(F("NO GPS SIGNAL"));
     Serial.println("Last known location:");
-     Serial.println("********** Publish location data to Server");
-      char mqtt_payload[60] = "";
-      snprintf(mqtt_payload, 60, "{\"latitude\":%lf,\"longitude\":%lf,\"idGPS\":\"%s\"}", latitude, longitude, idGPS);
-      Serial.print("Publish message: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish(topicLongLat, mqtt_payload);
-      Serial.println("*****************************************************");
+    Serial.println("********** Publish location data to Server");
+    char mqtt_payload[60] = "";
+    snprintf(mqtt_payload, 60, "{\"latitude\":%lf,\"longitude\":%lf,\"idGPS\":\"%s\"}", latitude, longitude, idGPS);
+    Serial.print("Publish message: ");
+    Serial.println(mqtt_payload);
+    mqtt.publish(topicLongLat, mqtt_payload);
+    Serial.println("*****************************************************");
 
 
     Serial.print("Satellites in view: ");
@@ -894,25 +932,19 @@ void sendGyro() {
 
       char mqtt_payload[150] = "";
 
-      snprintf(mqtt_payload, 50,"{\"1,\"idGPS\":\"%s\"}",idGPS);
+      snprintf(mqtt_payload, 50, "{\"1,\"idGPS\":\"%s\"}", idGPS);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish(topicMotionTrigger, mqtt_payload);
       Serial.println("*****************************************************");
 
-      snprintf(mqtt_payload, 150, "{\"acceleration.x\":%lf,\"acceleration.y\":%lf,\"acceleration.z\":%lf,\"idGPS\":\"%s\"}", a.acceleration.x, a.acceleration.y, a.acceleration.z,idGPS);
+      snprintf(mqtt_payload, 150, "{\"acceleration.x\":%lf,\"acceleration.y\":%lf,\"acceleration.z\":%lf,\"idGPS\":\"%s\"}", a.acceleration.x, a.acceleration.y, a.acceleration.z, idGPS);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish(topicMotion, mqtt_payload);
       Serial.println("> MQTT data published");
       Serial.println("********** End ");
       Serial.println("*****************************************************");
-
-
-
     }
   }
-
-
-
 }
