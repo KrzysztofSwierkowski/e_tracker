@@ -772,9 +772,9 @@ void checkChangeLocationAndSleep() {
         esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
         esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1);
         Serial.println("Start sleep...");
-         Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
+        // Set IO25 to sleep hold, so that when ESP32 sleeps, SIM800X will keep power and running
         gpio_hold_en(GPIO_NUM_25);  //MODEM_POWER_ON
-                                    //       esp_deep_sleep_start();
+      esp_deep_sleep_start();
         countChangesBelowInMeters = 0;
       }
     }
