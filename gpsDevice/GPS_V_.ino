@@ -122,7 +122,7 @@ Adafruit_MPU6050 mpu;  //22 scl, 21 SDA
 
 #define GPS Serial2
 #define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP 60          /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP 360          /* Time ESP32 will go to sleep (in seconds) */
 TinyGPSPlus gps;
 
 bool stateOfSleepMode = false;
@@ -239,8 +239,6 @@ void setup() {
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
-  //mqtt Sleep state device:
-  sendSleepState();
   //pref init
   preferencesInit();
   // Sim800L initializer
@@ -256,6 +254,8 @@ void setup() {
   //accelerometr init:
   mpu6050Init();
   gyroTest();
+  //mqtt Sleep state device:
+  sendSleepState();
   //
   delay(1000);
 }
