@@ -2,13 +2,19 @@
 #include "esp_bt_main.h"
 #include "esp_bt_device.h"
 ///////////Threads Handler//////////////
-#include <atomic>
-TaskHandle_t ELM327_task;
-TaskHandle_t GPS_task;
-TaskHandle_t Mqtt_task;
+// #include <atomic>
+// TaskHandle_t ELM327_task;
+// TaskHandle_t GPS_task;
+// TaskHandle_t Mqtt_task;
 
 //std::atomic<short> rpm{ 0 };
 ///////////////////////
+//storing data liblary by preferences 
+
+#include <Preferences.h>
+Preferences preferences;
+
+//////////////////////
 
 
 #define SIM800L_IP5306_VERSION_20190610
@@ -163,6 +169,8 @@ char* topicBluetoothPowerOn = "gpsDevice/001/BluetoothOn";
 char* topicObdIIPowerOn = "gpsDevice/001/obdIIOn";
 char* topicGpsPowerOn = "gpsDevice/001/GpsOn";
 char* topicaccelerometerPowerOn = "gpsDevice/001/accelerometerOn";
+char* topicMotionTrigger = "gpsDevice/001/MotionTrigger";
+char* topicMotion = "gpsDevice/001/Motion";
 
 const char* topic = "obdPower";
 
@@ -221,6 +229,8 @@ void setup() {
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
+  //pref init
+  preferencesInit();
   // Sim800L initializer
   simInit();
   //MQTT Setup:
@@ -230,14 +240,20 @@ void setup() {
   //GPS Setup:
   gpsSetup();
   // elm327Setup();
-  elm327Setup();
+//  elm327Setup();
   //accelerometr init:
   mpu6050Init();
+  gyroTest();
   //
   delay(1000);
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 
+//shared preferences initialize 
+void preferencesInit(){
+  preferences.begin("lastlocation", false);
+
+}
 
 // MQTT init:
 void mqttBrokerSetup() {
@@ -279,7 +295,7 @@ void mpu6050Init() {
   // set filter bandwidth to 21 Hz
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
-  threadsCreator();
+  //threadsCreator();
   motionDetectionByMPU6050Gyro();
 
   Serial.println("End of [MPU6050] initializing! all ok !");
@@ -383,67 +399,66 @@ void elm327Setup() {
 
 /////////////////////Threads init//////////////////////////
 
-void threadsCreator() {
-  // Do blocking OBD call on one core
-  xTaskCreatePinnedToCore(
-    get_ELM327_task,  // Task function.
-    "Task1",          // Name of task.
-    10000,            // Stack size of task
-    NULL,             // Parameter of the task
-    0,                // Priority of the task
-    &ELM327_task,     // Task handle to keep track of created task
-    0);               // Pin task to core 0
+// void threadsCreator() {
+//   // Do blocking OBD call on one core
+//   xTaskCreatePinnedToCore(
+//     get_ELM327_task,  // Task function.
+//     "Task1",          // Name of task.
+//     10000,            // Stack size of task
+//     NULL,             // Parameter of the task
+//     0,                // Priority of the task
+//     &ELM327_task,     // Task handle to keep track of created task
+//     0);               // Pin task to core 0
 
-  // Do timing specific work on another core
-  xTaskCreatePinnedToCore(
-    gps_handler_task,  // Task function.
-    "Task2",           // Name of task.
-    10000,             // Stack size of task
-    NULL,              // Parameter of the task
-    0,                 // Priority of the task
-    &GPS_task,         // Task handle to keep track of created task
-    1);                // Pin task to core 1
-}
+//   // Do timing specific work on another core
+//   xTaskCreatePinnedToCore(
+//     gps_handler_task,  // Task function.
+//     "Task2",           // Name of task.
+//     10000,             // Stack size of task
+//     NULL,              // Parameter of the task
+//     0,                 // Priority of the task
+//     &GPS_task,         // Task handle to keep track of created task
+//     1);                // Pin task to core 1
+// }
 
-void gps_handler_task(void* parameters) {
-  Serial.print("GPS_task running on core ");
-  Serial.println(xPortGetCoreID());
-  for (;;) {
-    mqttReconnect();
-    //gyroTest();
-    //batteryMonitor();
-    sendGyro();
-    searchGPS(1000);
-    checkGps();
-    sendLocation();
-    sendAltitude();
-    sendSpeed();
-    //delay(3000);
-    mqtt.loop();
-    mqtt.setCallback(mqttCallback);
-    delay(1);
-  }
-}
-void get_ELM327_task(void* parameters) {
-  String name = "Android-Vlink";
-  bool connected;
-  connected = SerialBT.connect(name);
-  Serial.print("ELM327_task running on core ");
-  Serial.println(xPortGetCoreID());
-  if (connected) {
-    for (;;) {
-      mqttReconnect();
-      odometerDistance();
-      elm327LoopTest();
-      mqtt.loop();
-      delay(1);
-    }
-  } else {
-    while (!SerialBT.connected(5000)) {
-      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
-    }
-  }
-}
+// void gps_handler_task(void* parameters) {
+//   Serial.print("GPS_task running on core ");
+//   Serial.println(xPortGetCoreID());
+//   for (;;) {
+//     mqttReconnect();
+//     //batteryMonitor();
+//     sendGyro();
+//     searchGPS(1000);
+//     checkGps();
+//     sendLocation();
+//     sendAltitude();
+//     sendSpeed();
+//     //delay(3000);
+//     mqtt.loop();
+//     mqtt.setCallback(mqttCallback);
+//     delay(1);
+//   }
+// }
+// void get_ELM327_task(void* parameters) {
+//   String name = "Android-Vlink";
+//   bool connected;
+//   connected = SerialBT.connect(name);
+//   Serial.print("ELM327_task running on core ");
+//   Serial.println(xPortGetCoreID());
+//   if (connected) {
+//     for (;;) {
+//       mqttReconnect();
+//      // odometerDistance();
+//       //elm327LoopTest();
+//       mqtt.loop();
+//       delay(1);
+//     }
+//   } else {
+//     while (!SerialBT.connected(5000)) {
+//       Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+//     }
+//   }
+// }
 //////////////////////////////////////////////
 
 static void searchGPS(unsigned long ms) {
@@ -473,7 +488,50 @@ static void searchGPS(unsigned long ms) {
 
 
 void loop() {
-  vTaskDelete(NULL);
+  //vTaskDelete(NULL);
+    mqttReconnect();
+    //batteryMonitor();
+    sendGyro();
+    searchGPS(1000);
+    checkGps();
+    sendLocation();
+    sendAltitude();
+    sendSpeed();
+    mqtt.loop();
+    mqtt.setCallback(mqttCallback);
+}
+
+void gyroTest() {
+
+  if (mpu.getMotionInterruptStatus()) {
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    /* Print out the values */
+    Serial.print("Acceleration X: ");
+    Serial.print(a.acceleration.x);
+    Serial.print(", Y: ");
+    Serial.print(a.acceleration.y);
+    Serial.print(", Z: ");
+    Serial.print(a.acceleration.z);
+    Serial.println(" m/s^2");
+
+    Serial.print("Rotation X: ");
+    Serial.print(g.gyro.x);
+    Serial.print(", Y: ");
+    Serial.print(g.gyro.y);
+    Serial.print(", Z: ");
+    Serial.print(g.gyro.z);
+    Serial.println(" rad/s");
+
+    Serial.print("Temperature: ");
+    Serial.print(temp.temperature);
+    Serial.println(" degC");
+
+    Serial.println("");
+    delay(500);
+  }
 }
 
 
@@ -675,55 +733,20 @@ void motionDetectionByMPU6050Gyro() {
   mpu.setMotionInterrupt(true);
 }
 
-
-void gyroTest() {
-
-  if (mpu.getMotionInterruptStatus()) {
-    /* Get new sensor events with the readings */
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-
-    /* Print out the values */
-    Serial.print("Acceleration X: ");
-    Serial.print(a.acceleration.x);
-    Serial.print(", Y: ");
-    Serial.print(a.acceleration.y);
-    Serial.print(", Z: ");
-    Serial.print(a.acceleration.z);
-    Serial.println(" m/s^2");
-
-    Serial.print("Rotation X: ");
-    Serial.print(g.gyro.x);
-    Serial.print(", Y: ");
-    Serial.print(g.gyro.y);
-    Serial.print(", Z: ");
-    Serial.print(g.gyro.z);
-    Serial.println(" rad/s");
-
-    Serial.print("Temperature: ");
-    Serial.print(temp.temperature);
-    Serial.println(" degC");
-
-    Serial.println("");
-    delay(500);
-  }
-}
-
-
 void checkChangeLocationAndSleep() {
   if (gps.location.isValid()) {
     float newlatitude = (gps.location.lat());
     float newlongitude = (gps.location.lng());
     float diffCordLat = newlatitude - latitude;
     float diffCordLon = newlongitude - longitude;
-    Serial.println(newlatitude, 8);
-    Serial.println(newlongitude, 8);
+    // Serial.println(newlatitude, 8);
+    // Serial.println(newlongitude, 8);
 
-    Serial.println(latitude, 8);
-    Serial.println(longitude, 8);
+    // Serial.println(latitude, 8);
+    // Serial.println(longitude, 8);
 
-    Serial.println(diffCordLat, 8);
-    Serial.println(diffCordLon, 8);
+    // Serial.println(diffCordLat, 8);
+    // Serial.println(diffCordLon, 8);
 
 
     float delLat = abs(latitude - newlatitude) * 6371;
@@ -769,7 +792,8 @@ void sendLocation() {
     if (gps.location.isValid()) {
       double latitude = (gps.location.lat());
       double longitude = (gps.location.lng());
-
+      preferences.putDouble("latitude", gps.location.lat());
+      preferences.putDouble("longitude", gps.location.lng());
 
       Serial.println("********** Publish location data to Server");
       char mqtt_payload[60] = "";
@@ -777,8 +801,6 @@ void sendLocation() {
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish(topicLongLat, mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
       Serial.println("*****************************************************");
 
 
@@ -799,8 +821,6 @@ void sendSpeed() {
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
       mqtt.publish(topicSpeed, mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
       Serial.println("*****************************************************");
     }
   } else {
@@ -819,8 +839,6 @@ void sendAltitude() {
     Serial.print("Publish message: ");
     Serial.println(mqtt_payload);
     mqtt.publish(topicAltitude, mqtt_payload);
-    Serial.println("> MQTT data published");
-    Serial.println("********** End ");
     Serial.println("*****************************************************");
 
     //     }
@@ -828,7 +846,21 @@ void sendAltitude() {
 
 
   } else {
+
+    double latitude = preferences.getDouble("latitude", 0);
+    double longitude = preferences.getDouble("longitude", 0);
+    
     Serial.println(F("NO GPS SIGNAL"));
+    Serial.println("Last known location:");
+     Serial.println("********** Publish location data to Server");
+      char mqtt_payload[60] = "";
+      snprintf(mqtt_payload, 60, "{\"latitude\":%lf,\"longitude\":%lf,\"idGPS\":\"%s\"}", latitude, longitude, idGPS);
+      Serial.print("Publish message: ");
+      Serial.println(mqtt_payload);
+      mqtt.publish(topicLongLat, mqtt_payload);
+      Serial.println("*****************************************************");
+
+
     Serial.print("Satellites in view: ");
     Serial.print(gps.satellites.value());
   }
@@ -860,53 +892,27 @@ void sendGyro() {
       sensors_event_t a, g, temp;
       mpu.getEvent(&a, &g, &temp);
 
-      Serial.println("********** Publish speed by MQTT");
-      char mqtt_payload[50] = "";
-      snprintf(mqtt_payload, 50, "%0.2lf", a.acceleration.x);
+      char mqtt_payload[150] = "";
+
+      snprintf(mqtt_payload, 50,"{\"1,\"idGPS\":\"%s\"}",idGPS);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
-      mqtt.publish("gpsDevice/001/a.acceleration.x", mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
+      mqtt.publish(topicMotionTrigger, mqtt_payload);
       Serial.println("*****************************************************");
 
-      Serial.println("********** Publish speed by MQTT");
-
-      snprintf(mqtt_payload, 50, "%0.2lf", a.acceleration.y);
+      snprintf(mqtt_payload, 150, "{\"acceleration.x\":%lf,\"acceleration.y\":%lf,\"acceleration.z\":%lf,\"idGPS\":\"%s\"}", a.acceleration.x, a.acceleration.y, a.acceleration.z,idGPS);
       Serial.print("Publish message: ");
       Serial.println(mqtt_payload);
-      mqtt.publish("gpsDevice/001/a.acceleration.y", mqtt_payload);
+      mqtt.publish(topicMotion, mqtt_payload);
       Serial.println("> MQTT data published");
       Serial.println("********** End ");
       Serial.println("*****************************************************");
 
-      Serial.println("********** Publish speed by MQTT");
 
-      snprintf(mqtt_payload, 50, "%0.2lf", a.acceleration.z);
-      Serial.print("Publish message: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish("gpsDevice/001/a.acceleration.z", mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
-      Serial.println("*****************************************************");
 
-      Serial.println("********** Publish speed by MQTT");
-
-      snprintf(mqtt_payload, 50, "%0.2lf", temp.temperature);
-      Serial.print("Publish message: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish("obdPower", mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
-      Serial.println("*****************************************************");
-
-      snprintf(mqtt_payload, 50, "1");
-      Serial.print("Publish message [GPS]: ");
-      Serial.println(mqtt_payload);
-      mqtt.publish(topicGpsPowerOn, mqtt_payload);
-      Serial.println("> MQTT data published");
-      Serial.println("********** End ");
-      Serial.println("*****************************************************");
     }
   }
+
+
+
 }
