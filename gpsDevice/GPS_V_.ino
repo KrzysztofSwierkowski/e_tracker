@@ -139,7 +139,7 @@ double altitude = 0.00;
 double altitudeOld = 0.00;
 const char* idGPS = "001";
 bool locationIsValid = true;
-int noChangePositionSleepTriger = 30;
+int noChangePositionSleepTriger = 30; //how many times wait on no changes position to deep sleep mode 
 
 //battery monitor value init:
 //const int BatteryPin = 34;
@@ -232,27 +232,15 @@ boolean mqttConnect() {
   return mqtt.connected();
 }
 
-void print_wakeup_reason(){
-esp_sleep_wakeup_cause_t wakeup_reason;
 
-wakeup_reason = esp_sleep_get_wakeup_cause();
-
-switch(wakeup_reason)
-{
-case 1 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
-case 2 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
-case 3 : Serial.println("Wakeup caused by timer"); break;
-case 4 : Serial.println("Wakeup caused by touchpad"); break;
-case 5 : Serial.println("Wakeup caused by ULP program"); break;
-default : Serial.println("Wakeup was not caused by deep sleep"); break;
-}
-}
 
 void setup() {
-  print_wakeup_reason();
+
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
+  //mqtt Sleep state device:
+  sendSleepState();
   //pref init
   preferencesInit();
   // Sim800L initializer
@@ -747,7 +735,7 @@ void motionDetectionByMPU6050Gyro() {
   //setupt motion detection
   mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
   mpu.setMotionDetectionThreshold(1);
-  mpu.setMotionDetectionDuration(500);
+  mpu.setMotionDetectionDuration(50);
   mpu.setInterruptPinLatch(true);  // Keep it latched.  Will turn off when reinitialized.
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
@@ -757,27 +745,9 @@ void checkChangeLocationAndSleep() {
   if (gps.location.isValid()) {
     float newlatitude = (gps.location.lat());
     float newlongitude = (gps.location.lng());
-    float diffCordLat = newlatitude - latitude;
-    float diffCordLon = newlongitude - longitude;
-    // Serial.println(newlatitude, 8);
-    // Serial.println(newlongitude, 8);
-
-    // Serial.println(latitude, 8);
-    // Serial.println(longitude, 8);
-
-    // Serial.println(diffCordLat, 8);
-    // Serial.println(diffCordLon, 8);
-
-
-    // float delLat = abs(latitude - newlatitude) * 6371;
-    // float delLong = 6371 * abs(longitude - newlongitude) * cos(radians((latitude - newlatitude) / 2));
-    // float distance = (sqrt(pow(delLat, 2) + pow(delLong, 2))) * 1000;  //
-
     float delLat = abs(latitude - newlatitude);
     float delLong = abs(longitude - newlongitude);
     float distance = ((sqrt(pow(delLat, 2) + pow(delLong, 2))) * 73) * 1000;  //
-
-
     Serial.println("distance in meters");
     Serial.println(distance, 3);
 
