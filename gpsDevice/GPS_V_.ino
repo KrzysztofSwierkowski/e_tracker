@@ -229,6 +229,8 @@ boolean mqttConnect() {
   }
   SerialMon.println(" - success");
   mqtt.publish(topicInit, "GsmClientTest started");
+    //mqtt Sleep state device:
+  sendSleepState();
   return mqtt.connected();
 }
 
@@ -254,8 +256,6 @@ void setup() {
   //accelerometr init:
   mpu6050Init();
   gyroTest();
-  //mqtt Sleep state device:
-  sendSleepState();
   //
   delay(1000);
 }
@@ -897,6 +897,7 @@ void sendGyro() {
     digitalWrite(LED_GPIO, ledStatus);
     if (mpu.getMotionInterruptStatus()) {
       /* Get new sensor events with the readings */
+      countChangesBelowInMeters = 0;
       sensors_event_t a, g, temp;
       mpu.getEvent(&a, &g, &temp);
 
