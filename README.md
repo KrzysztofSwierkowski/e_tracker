@@ -23,11 +23,12 @@ Map(Recive data from MQTT broker and then by google maps plugin put marker on th
 <img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/Client_UI.jpg" width="300">
 Provider (take gps position(when device change position and send data to MQTT broker)
 <img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/ProviderUI.jpg" width="300">
-GPS setup (GPS module, Sim module, ESP32 module, powermodule + battery), thats device will be send localization data to the broker by GPRS) Maybe receive some command in the future
-<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/Settings.JPG" width="300">
+GPS setup 
+<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/Settings.jpg" width="300">
 Device settings: 
 <img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/DeviceSettings.jpg" width="300">
 Device Menager:
 <img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/DeviceMenager.jpg" width="300">
 E-Tracker GPS Device schema: 
-<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/schema.jpg" width="300">
+<img src="https://github.com/KrzysztofSwierkowski/phone_mqtt/blob/master/Images/schema.png" width="300">
+(ESP32 module, GPS module, Sim module, MPU6050, powermodule + battery), thats device will be send localization data to the broker by GPRS)
